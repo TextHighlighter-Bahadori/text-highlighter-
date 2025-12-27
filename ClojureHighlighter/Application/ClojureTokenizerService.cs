@@ -1,8 +1,9 @@
+using System.Text;
 using ClojureHighlighter.Domain;
 
 namespace ClojureHighlighter.Application;
 
-public class ClojureTokenizer
+public class ClojureTokenizerService
 {
     private readonly string _input;
     private int _position;
@@ -22,7 +23,7 @@ public class ClojureTokenizer
     };
     
     
-    public ClojureTokenizer(string input)
+    public ClojureTokenizerService(string input)
     {
         _input = input;
         _position = 0;
@@ -67,5 +68,59 @@ public class ClojureTokenizer
             
         return new Token(TokenType.Comment, _input.Substring(start, _position - start), startLine, startColumn, start);
     }
+    
+    private Token ReadString()
+    {
+        int start = _position;
+        int startLine = _line;
+        int startColumn = _column;
+            
+        // Skip opening quote
+        _position++; 
+        _column++;
+            
+        var stringLiteral = new StringBuilder("\"");
+            
+        while (_position < _input.Length)
+        {
+            char nextChar = _input[_position];
+                
+            //it is for closing quote
+            if (nextChar == '"')
+            {
+                stringLiteral.Append(nextChar);
+                _position++;
+                _column++;
+                break;
+            }
+                
+            // it is for handling escape sequences.
+            if (nextChar == '\\' && _position + 1 < _input.Length)
+            {
+                stringLiteral.Append(nextChar);
+                _position++;
+                _column++;
+                stringLiteral.Append(_input[_position]);
+            }
+            else
+            {
+                stringLiteral.Append(nextChar);
+                if (nextChar == '\n')
+                {
+                    _line++;
+                    _column = 1;
+                }
+                else
+                {
+                    _column++;
+                }
+            }
+                
+            _position++;
+        }
+            
+        return new Token(TokenType.String, stringLiteral.ToString(), startLine, startColumn, start);
+    }
+
 
 }
