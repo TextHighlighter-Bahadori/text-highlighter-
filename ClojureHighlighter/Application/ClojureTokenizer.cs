@@ -1,3 +1,5 @@
+using ClojureHighlighter.Domain;
+
 namespace ClojureHighlighter.Application;
 
 public class ClojureTokenizer
@@ -18,5 +20,52 @@ public class ClojureTokenizer
         "ns", "in-ns", "import", "require", "use", "refer",
         "and", "or", "not"
     };
+    
+    
+    public ClojureTokenizer(string input)
+    {
+        _input = input;
+        _position = 0;
+        _line = 1;
+        _column = 1;
+    }
+    
+    private Token ReadWhitespace()
+    {
+        int start = _position;
+        int startLine = _line;
+        int startColumn = _column;
+            
+        while (_position < _input.Length && char.IsWhiteSpace(_input[_position]))
+        {
+            if (_input[_position] == '\n')
+            {
+                _line++;
+                _column = 1;
+            }
+            else
+            {
+                _column++;
+            }
+            _position++;
+        }
+            
+        return new Token(TokenType.Whitespace, _input.Substring(start, _position - start), startLine, startColumn, start);
+    }
+    
+    private Token ReadComment()
+    {
+        int start = _position;
+        int startLine = _line;
+        int startColumn = _column;
+            
+        while (_position < _input.Length && _input[_position] != '\n')
+        {
+            _position++;
+            _column++;
+        }
+            
+        return new Token(TokenType.Comment, _input.Substring(start, _position - start), startLine, startColumn, start);
+    }
 
 }
