@@ -7,23 +7,13 @@ public class ClojureParserService : IClojureParserService
 {
     private List<Token> _tokens;
     private int _current;
-
-    private readonly HashSet<string> _definitionForms = new HashSet<string>
-    {
-        "def", "defn", "defn-", "defmacro", "defmethod", "defmulti",
-        "defprotocol", "defrecord", "defstruct", "deftype"
-    };
-
+    
     private readonly HashSet<string> _bindingForms = new HashSet<string>
     {
         "let", "letfn", "binding", "loop", "for", "doseq"
     };
-
-    private readonly HashSet<string> _conditionalForms = new HashSet<string>
-    {
-        "if", "if-not", "if-let", "when", "when-not", "when-let", "cond", "condp", "case"
-    };
-
+    
+    
     public ClojureParserService(List<Token> tokens)
     {
         _tokens = tokens;
@@ -33,12 +23,119 @@ public class ClojureParserService : IClojureParserService
 
     public List<AstNode> Parse()
     {
-        throw new NotImplementedException();
+        var nodes = new List<AstNode>();
+
+        while (!IsAtEnd())
+        {
+            SkipWhitespaceAndComments();
+            if (!IsAtEnd())
+            {
+                var node = ParseExpression();
+                nodes.Add(node);
+            }
+        }
+
+        return nodes;
     }
 
-    private AstNode ParseExpression()
+    private AstNode? ParseExpression()
     {
-        throw new NotImplementedException();
+        SkipWhitespaceAndComments();
+
+        if (IsAtEnd())
+            return null;
+
+        Token current = CurrentToken();
+
+        switch (current.Type)
+        {
+            case TokenType.LeftParen:
+                return ParseList();
+            case TokenType.LeftBracket:
+                return ParseVector();
+            case TokenType.LeftBrace:
+                return ParseMap();
+            case TokenType.String:
+            case TokenType.Number:
+            case TokenType.Character:
+            case TokenType.Boolean:
+            case TokenType.Nil:
+                return ParseLiteral();
+            case TokenType.Keyword:
+                var lit = new LiteralNode(current);
+                Advance();
+                return lit;
+            case TokenType.Symbol:
+            case TokenType.SpecialForm:
+                return ParseSymbol();
+            default:
+                Advance();
+                return null;
+        }
+    }
+
+
+    private AstNode ParseList()
+    {
+        int startPos = CurrentToken().Position;
+        Advance(); // Skip '('
+        SkipWhitespaceAndComments();
+
+        if (IsAtEnd() || CurrentToken().Type == TokenType.RightParen)
+        {
+            if (!IsAtEnd()) Advance();
+            return new ListNode { StartPosition = startPos };
+        }
+
+        // Check if this is a special form
+        Token firstToken = CurrentToken();
+
+        if (firstToken.Type == TokenType.SpecialForm || firstToken.Type == TokenType.Symbol)
+        {
+            string formName = firstToken.Value;
+
+            // Handle function definitions
+            if (formName == "defn" || formName == "defn-" || formName == "defmacro")
+            {
+                return ParseDefn(startPos, firstToken);
+            }
+
+            // Handle def
+            if (formName == "def")
+            {
+                return ParseDef(startPos, firstToken);
+            }
+
+            // Handle let forms
+            if (_bindingForms.Contains(formName))
+            {
+                return ParseLet(startPos, firstToken);
+            }
+
+            // Handle if forms
+            if (formName == "if" || formName == "if-not")
+            {
+                return ParseIf(startPos, firstToken);
+            }
+
+            // Handle fn (lambda)
+            if (formName == "fn")
+            {
+                return ParseLambda(startPos, firstToken);
+            }
+
+            // Handle ns
+            if (formName == "ns")
+            {
+                return ParseNamespace(startPos, firstToken);
+            }
+
+            // Otherwise, it's a function call
+            return ParseFunctionCall(startPos, firstToken);
+        }
+
+        // Generic list
+        return ParseGenericList(startPos);
     }
 
     private DefnNode ParseDefn(int startPos, Token defnToken)
