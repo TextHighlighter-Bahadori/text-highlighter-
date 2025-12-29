@@ -366,7 +366,7 @@ public class ClojureParserService : IClojureParserService
         var callNode = new FunctionCallNode
         {
             FunctionName = new SymbolNode(functionToken, SymbolRole.FunctionCall),
-            StartPosition = startPosf
+            StartPosition = startPos
         };
 
         // Skip function name
@@ -389,6 +389,95 @@ public class ClojureParserService : IClojureParserService
         }
 
         return callNode;
+    }
+
+
+    private ListNode ParseGenericList(int startPos)
+    {
+        var list = new ListNode { StartPosition = startPos };
+
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            var expr = ParseExpression();
+
+            list.Elements.Add(expr);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            list.EndPosition = CurrentToken().Position;
+            Advance(); // Skip ')'
+        }
+
+        return list;
+    }
+
+
+    private VectorNode ParseVector()
+    {
+        var vector = new VectorNode { StartPosition = CurrentToken().Position };
+        Advance(); // Skip '['
+
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBracket)
+        {
+            SkipWhitespaceAndComments();
+            if (CurrentToken().Type != TokenType.RightBracket)
+            {
+                var expr = ParseExpression();
+
+                vector.Elements.Add(expr);
+            }
+        }
+
+        if (!IsAtEnd())
+        {
+            vector.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return vector;
+    }
+
+
+    private MapNode ParseMap()
+    {
+        var map = new MapNode { StartPosition = CurrentToken().Position };
+        Advance(); // Skip '{'
+
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
+        {
+            SkipWhitespaceAndComments();
+            if (CurrentToken().Type != TokenType.RightBrace)
+            {
+                var expr = ParseExpression();
+
+                map.Elements.Add(expr);
+            }
+        }
+
+        if (!IsAtEnd())
+        {
+            map.EndPosition = CurrentToken().Position;
+            Advance(); // Skip '}'
+        }
+
+        return map;
+    }
+
+
+    private LiteralNode ParseLiteral()
+    {
+        var literal = new LiteralNode(CurrentToken());
+        Advance();
+        return literal;
+    }
+
+    private SymbolNode ParseSymbol()
+    {
+        var symbol = new SymbolNode(CurrentToken(), SymbolRole.Unknown);
+        Advance();
+        return symbol;
     }
 
     private void SkipWhitespaceAndComments()
