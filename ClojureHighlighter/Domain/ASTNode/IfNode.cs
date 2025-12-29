@@ -1,6 +1,6 @@
 namespace ClojureHighlighter.Domain.ASTNode;
 
-public class IfNode
+public class IfNode : AstNode
 {
     public Token IfKeyword { get; set; }
     public AstNode Condition { get; set; }
