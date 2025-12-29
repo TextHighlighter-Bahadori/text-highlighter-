@@ -35,6 +35,125 @@ public class ClojureParserService : IClojureParserService
         throw new NotImplementedException();
     }
 
+    private AstNode ParseExpression()
+    {
+        throw new NotImplementedException();
+    }
+
+    private DefnNode ParseDefn(int startPos, Token defnToken)
+        {
+            var defnNode = new DefnNode
+            {
+                DefnKeyword = defnToken,
+                StartPosition = startPos,
+                IsPrivate = defnToken.Value == "defn-"
+            };
+
+            // Skip 'defn'
+            Advance(); 
+            SkipWhitespaceAndComments();
+
+          
+            if (!IsAtEnd() && (CurrentToken().Type == TokenType.Symbol || CurrentToken().Type == TokenType.SpecialForm))
+            {
+                defnNode.FunctionName = new SymbolNode(CurrentToken(), SymbolRole.FunctionName);
+                Advance();
+            }
+
+            SkipWhitespaceAndComments();
+
+           
+            if (!IsAtEnd() && CurrentToken().Type == TokenType.String)
+            {
+                defnNode.Docstring = CurrentToken().Value;
+                Advance();
+                SkipWhitespaceAndComments();
+            }
+            
+            if (!IsAtEnd() && CurrentToken().Type == TokenType.LeftBracket)
+            {
+                Advance();
+                SkipWhitespaceAndComments();
+
+                while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBracket)
+                {
+                    if (CurrentToken().Type == TokenType.Symbol)
+                    {
+                        defnNode.Parameters.Add(new SymbolNode(CurrentToken(), SymbolRole.Parameter));
+                    }
+                    Advance();
+                    SkipWhitespaceAndComments();
+                }
+
+                if (!IsAtEnd()) Advance();
+            }
+
+            SkipWhitespaceAndComments();
+
+            // Parse body
+            while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+            {
+                var expr = ParseExpression();
+                if (expr != null)
+                    defnNode.Body.Add(expr);
+                SkipWhitespaceAndComments();
+            }
+
+            if (!IsAtEnd())
+            {
+                defnNode.EndPosition = CurrentToken().Position;
+                Advance(); // Skip ')'
+            }
+
+            return defnNode;
+        }
+
+        private DefNode ParseDef(int startPos, Token defToken)
+        {
+            var defNode = new DefNode
+            {
+                DefKeyword = defToken,
+                StartPosition = startPos
+            };
+
+            // Skip 'def'
+            Advance(); 
+            SkipWhitespaceAndComments();
+
+            // Parse variable name
+            if (!IsAtEnd() && (CurrentToken().Type == TokenType.Symbol || CurrentToken().Type == TokenType.SpecialForm))
+            {
+                defNode.VariableName = new SymbolNode(CurrentToken(), SymbolRole.Variable);
+                Advance();
+            }
+
+            SkipWhitespaceAndComments();
+
+            // Check for docstring
+            if (!IsAtEnd() && CurrentToken().Type == TokenType.String)
+            {
+                defNode.Docstring = CurrentToken().Value;
+                Advance();
+                SkipWhitespaceAndComments();
+            }
+
+            // Parse value
+            if (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+            {
+                defNode.Value = ParseExpression();
+            }
+
+            SkipWhitespaceAndComments();
+
+            if (!IsAtEnd() && CurrentToken().Type == TokenType.RightParen)
+            {
+                defNode.EndPosition = CurrentToken().Position;
+                Advance();
+            }
+
+            return defNode;
+        }
+
     
     private void SkipWhitespaceAndComments()
     {
