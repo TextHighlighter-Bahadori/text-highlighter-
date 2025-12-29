@@ -31,6 +31,99 @@ public class ClojureTokenizerService
         _column = 1;
     }
 
+    
+    public List<Token> Tokenize()
+        {
+            var tokens = new List<Token>();
+            
+            while (_position < _input.Length)
+            {
+                var token = NextToken();
+                if (token != null)
+                {
+                    tokens.Add(token);
+                }
+            }
+            
+            tokens.Add(new Token(TokenType.EOF, "", _line, _column, _position));
+            return tokens;
+        }
+
+        private Token NextToken()
+        {
+            if (_position >= _input.Length)
+                return null;
+
+            char current = _input[_position];
+
+            // Whitespace
+            if (char.IsWhiteSpace(current))
+                return ReadWhitespace();
+
+            // Comments
+            if (current == ';')
+                return ReadComment();
+
+            // Strings
+            if (current == '"')
+                return ReadString();
+
+            // Characters
+            if (current == '\\')
+                return ReadCharacter();
+
+            // Keywords
+            if (current == ':')
+                return ReadKeyword();
+
+            // Reader macros
+            if (current == '\'')
+                return CreateToken(TokenType.Quote, "'");
+            if (current == '@')
+                return CreateToken(TokenType.Deref, "@");
+            if (current == '^')
+                return CreateToken(TokenType.Metadata, "^");
+            if (current == '`')
+                return CreateToken(TokenType.SyntaxQuote, "`");
+            if (current == '~')
+            {
+                if (Peek() == '@')
+                {
+                    Advance();
+                    return CreateToken(TokenType.UnquoteSplicing, "~@");
+                }
+                return CreateToken(TokenType.Unquote, "~");
+            }
+
+            // Dispatch reader macro
+            if (current == '#')
+                return ReadDispatch();
+
+            // Delimiters
+            if (current == '(')
+                return CreateToken(TokenType.LeftParen, "(");
+            if (current == ')')
+                return CreateToken(TokenType.RightParen, ")");
+            if (current == '[')
+                return CreateToken(TokenType.LeftBracket, "[");
+            if (current == ']')
+                return CreateToken(TokenType.RightBracket, "]");
+            if (current == '{')
+                return CreateToken(TokenType.LeftBrace, "{");
+            if (current == '}')
+                return CreateToken(TokenType.RightBrace, "}");
+
+            // Numbers
+            if (char.IsDigit(current) || (current == '-' && _position + 1 < _input.Length && char.IsDigit(_input[_position + 1])))
+                return ReadNumber();
+            
+            if (IsSymbolStart(current))
+                return ReadSymbol();
+
+            // Unknown characters
+            return CreateToken(TokenType.Symbol, current.ToString());
+        }
+    
     private Token ReadWhitespace()
     {
         int start = _position;
@@ -172,16 +265,6 @@ public class ClojureTokenizerService
 
         return new Token(TokenType.Keyword, sb.ToString(), startLine, startColumn, start);
     }
-
-    private bool IsSymbolStart(char c)
-    {
-        return char.IsLetter(c) || "+-*/<>=!?$%&_".Contains(c);
-    }
-
-    private bool IsSymbolChar(char c)
-    {
-        return char.IsLetterOrDigit(c) || "+-*/<>=!?$%&_.:'#".Contains(c);
-    }
     
     private Token ReadDispatch()
     {
@@ -208,4 +291,105 @@ public class ClojureTokenizerService
             
         return new Token(TokenType.Dispatch, sb.ToString(), startLine, startColumn, start);
     }
+    
+    private Token ReadNumber()
+    {
+        int start = _position;
+        int startLine = _line;
+        int startColumn = _column;
+            
+        var sb = new StringBuilder();
+            
+        // Handle negative sign
+        if (_input[_position] == '-')
+        {
+            sb.Append('-');
+            _position++;
+            _column++;
+        }
+        
+        while (_position < _input.Length && (char.IsDigit(_input[_position]) || _input[_position] == '.' || 
+                                             _input[_position] == 'e' || _input[_position] == 'E' || _input[_position] == 'M' || 
+                                             _input[_position] == 'N' || _input[_position] == '/' || _input[_position] == 'r'))
+        {
+            sb.Append(_input[_position]);
+            _position++;
+            _column++;
+        }
+            
+        return new Token(TokenType.Number, sb.ToString(), startLine, startColumn, start);
+    }
+    
+    private Token ReadSymbol()
+    {
+        int start = _position;
+        int startLine = _line;
+        int startColumn = _column;
+            
+        var sb = new StringBuilder();
+            
+        while (_position < _input.Length && IsSymbolChar(_input[_position]))
+        {
+            sb.Append(_input[_position]);
+            _position++;
+            _column++;
+        }
+            
+        string value = sb.ToString();
+            
+        // Check for special values
+        if (value == "true" || value == "false")
+            return new Token(TokenType.Boolean, value, startLine, startColumn, start);
+        if (value == "nil")
+            return new Token(TokenType.Nil, value, startLine, startColumn, start);
+        if (SpecialForms.Contains(value))
+            return new Token(TokenType.SpecialForm, value, startLine, startColumn, start);
+            
+        return new Token(TokenType.Symbol, value, startLine, startColumn, start);
+    }
+    
+    
+    private char Peek()
+    {
+        if (_position + 1 < _input.Length)
+            return _input[_position + 1];
+        return '\0';
+    }
+
+    private void Advance()
+    {
+        if (_position < _input.Length)
+        {
+            if (_input[_position] == '\n')
+            {
+                _line++;
+                _column = 1;
+            }
+            else
+            {
+                _column++;
+            }
+            _position++;
+        }
+    }
+    
+    private Token CreateToken(TokenType type, string value)
+    {
+        var token = new Token(type, value, _line, _column, _position);
+        _position += value.Length;
+        _column += value.Length;
+        return token;
+    }
+    
+    private bool IsSymbolStart(char c)
+    {
+        return char.IsLetter(c) || "+-*/<>=!?$%&_".Contains(c);
+    }
+
+    private bool IsSymbolChar(char c)
+    {
+        return char.IsLetterOrDigit(c) || "+-*/<>=!?$%&_.:'#".Contains(c);
+    }
+    
+    
 }
