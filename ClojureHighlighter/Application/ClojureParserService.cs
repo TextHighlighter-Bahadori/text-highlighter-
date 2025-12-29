@@ -158,7 +158,6 @@ public class ClojureParserService : IClojureParserService
     }
 
 
-    
     private LetNode ParseLet(int startPos, Token letToken)
     {
         var letNode = new LetNode
@@ -228,7 +227,7 @@ public class ClojureParserService : IClojureParserService
         return letNode;
     }
 
-    
+
     private IfNode ParseIf(int startPos, Token ifToken)
     {
         var ifNode = new IfNode
@@ -238,7 +237,7 @@ public class ClojureParserService : IClojureParserService
         };
 
         // Skip 'if'
-        Advance(); 
+        Advance();
         SkipWhitespaceAndComments();
 
         // Parse condition
@@ -254,7 +253,7 @@ public class ClojureParserService : IClojureParserService
             ifNode.ThenBranch = ParseExpression();
             SkipWhitespaceAndComments();
         }
-        
+
         if (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
         {
             ifNode.ElseBranch = ParseExpression();
@@ -269,8 +268,129 @@ public class ClojureParserService : IClojureParserService
 
         return ifNode;
     }
-    
-    
+
+    private LambdaNode ParseLambda(int startPos, Token fnToken)
+    {
+        var lambdaNode = new LambdaNode
+        {
+            FnKeyword = fnToken,
+            StartPosition = startPos
+        };
+
+        // Skip 'fn'
+        Advance();
+        SkipWhitespaceAndComments();
+
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.LeftBracket)
+        {
+            Advance();
+            SkipWhitespaceAndComments();
+
+            while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBracket)
+            {
+                if (CurrentToken().Type == TokenType.Symbol)
+                {
+                    lambdaNode.Parameters.Add(new SymbolNode(CurrentToken(), SymbolRole.Parameter));
+                }
+
+                Advance();
+                SkipWhitespaceAndComments();
+            }
+
+            if (!IsAtEnd()) Advance();
+        }
+
+        SkipWhitespaceAndComments();
+
+        // Parse body
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            var expr = ParseExpression();
+
+            lambdaNode.Body.Add(expr);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            lambdaNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return lambdaNode;
+    }
+
+
+    private NamespaceNode ParseNamespace(int startPos, Token nsToken)
+    {
+        var nsNode = new NamespaceNode
+        {
+            NsKeyword = nsToken,
+            StartPosition = startPos
+        };
+
+        // Skip 'ns'
+        Advance();
+        SkipWhitespaceAndComments();
+
+        // Parse namespace name
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.Symbol)
+        {
+            nsNode.NamespaceName = new SymbolNode(CurrentToken(), SymbolRole.NamespaceAlias);
+            Advance();
+        }
+
+        SkipWhitespaceAndComments();
+
+        // Parse declarations
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            var expr = ParseExpression();
+
+            nsNode.Declarations.Add(expr);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            nsNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return nsNode;
+    }
+
+
+    private FunctionCallNode ParseFunctionCall(int startPos, Token functionToken)
+    {
+        var callNode = new FunctionCallNode
+        {
+            FunctionName = new SymbolNode(functionToken, SymbolRole.FunctionCall),
+            StartPosition = startPosf
+        };
+
+        // Skip function name
+        Advance();
+        SkipWhitespaceAndComments();
+
+        // Parse arguments
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            var arg = ParseExpression();
+
+            callNode.Arguments.Add(arg);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            callNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return callNode;
+    }
+
     private void SkipWhitespaceAndComments()
     {
         while (!IsAtEnd() &&
@@ -280,14 +400,14 @@ public class ClojureParserService : IClojureParserService
             Advance();
         }
     }
-    
-    
+
+
     private Token CurrentToken()
     {
         return _tokens[_current];
     }
 
-    
+
     private Token PeekToken(int offset = 1)
     {
         int index = _current + offset;
@@ -296,14 +416,14 @@ public class ClojureParserService : IClojureParserService
         return _tokens[_tokens.Count - 1];
     }
 
-    
+
     private void Advance()
     {
         if (!IsAtEnd())
             _current++;
     }
 
-    
+
     private bool IsAtEnd()
     {
         return _current >= _tokens.Count || CurrentToken().Type == TokenType.EOF;
