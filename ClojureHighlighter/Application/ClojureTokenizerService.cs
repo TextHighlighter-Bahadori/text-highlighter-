@@ -10,7 +10,7 @@ public class ClojureTokenizerService : IClojureTokenizerService
     private int _line;
     private int _column;
 
-    private static readonly HashSet<string> SpecialForms = new HashSet<string>
+    private static readonly HashSet<string> SpecialForms = new()
     {
         "def", "defn", "defn-", "defmacro", "defmethod", "defmulti",
         "defprotocol", "defrecord", "defstruct", "deftype",

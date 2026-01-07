@@ -8,7 +8,7 @@ public class ClojureParserService : IClojureParserService
     private List<Token> _tokens;
     private int _current;
     
-    private readonly HashSet<string> _bindingForms = new HashSet<string>
+    private readonly HashSet<string> _bindingForms = new ()
     {
         "let", "letfn", "binding", "loop", "for", "doseq"
     };
@@ -87,7 +87,7 @@ public class ClojureParserService : IClojureParserService
             return new ListNode { StartPosition = startPos };
         }
 
-        // Check if this is a special form
+       
         Token firstToken = CurrentToken();
 
         if (firstToken.Type == TokenType.SpecialForm || firstToken.Type == TokenType.Symbol)

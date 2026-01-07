@@ -10,13 +10,13 @@ public class HighlightedToken
     public SymbolRole? Role { get; set; }
 }
 
-public class SyntaxHighlighter : ISyntaxHighlighter
+public class SyntaxHighlighterService : ISyntaxHighlighter
 {
     private readonly IClojureParserService _parserService;
     private readonly IClojureTokenizerService _tokenizerService;
     private readonly Dictionary<int, string> _positionToColor;
 
-    public SyntaxHighlighter(List<Token> tokens, IClojureParserService parserService,
+    public SyntaxHighlighterService(IClojureParserService parserService,
         IClojureTokenizerService tokenizerService)
     {
         _positionToColor = new Dictionary<int, string>();
@@ -42,6 +42,11 @@ public class SyntaxHighlighter : ISyntaxHighlighter
             if (token.Type == TokenType.EOF)
                 continue;
 
+            
+            /*
+             * first we check whether a specific token has semantic meaning or not(it belongs to a node of AST), if not,
+             * we simply assign an arbitrary color regardless of the structure(e.g, GetColorForTokenType() method)
+             */
             string color;
             if (_positionToColor.ContainsKey(token.Position))
             {
@@ -173,6 +178,7 @@ public class SyntaxHighlighter : ISyntaxHighlighter
     }
 
 
+    
     private static string GetColorForTokenType(TokenType type)
     {
         return type switch
