@@ -1,3 +1,4 @@
+using ClojureHighlighter.Application.FactoryMethods;
 using ClojureHighlighter.Domain;
 using ClojureHighlighter.Domain.ASTNode;
 
@@ -12,23 +13,25 @@ public class HighlightedToken
 
 public class SyntaxHighlighterService : ISyntaxHighlighter
 {
-    private readonly IClojureParserService _parserService;
-    private readonly IClojureTokenizerService _tokenizerService;
+    private readonly IClojureParserServiceFactory _parserServiceFactory;
+    private readonly IClojureTokenizerServiceFactory _tokenizerServiceFactory;
     private readonly Dictionary<int, string> _positionToColor;
 
-    public SyntaxHighlighterService(IClojureParserService parserService,
-        IClojureTokenizerService tokenizerService)
+    public SyntaxHighlighterService(IClojureParserServiceFactory parserServiceFactory,
+        IClojureTokenizerServiceFactory tokenizerServiceFactory)
     {
         _positionToColor = new Dictionary<int, string>();
-        _parserService = parserService;
-        _tokenizerService = tokenizerService;
+        _parserServiceFactory = parserServiceFactory;
+        _tokenizerServiceFactory = tokenizerServiceFactory;
     }
 
     public List<HighlightedToken> HighlightCode(string code)
     {
-        var tokens = _tokenizerService.Tokenize();
+        var tokenizerService = _tokenizerServiceFactory.Create(code);
+        var tokens = tokenizerService.Tokenize();
 
-        var ast = _parserService.Parse();
+        var parserService = _parserServiceFactory.Create(tokens);
+        var ast = parserService.Parse();
 
 
         foreach (var node in ast)

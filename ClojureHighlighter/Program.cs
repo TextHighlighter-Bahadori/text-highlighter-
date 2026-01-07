@@ -1,11 +1,12 @@
 using ClojureHighlighter.Application;
+using ClojureHighlighter.Application.FactoryMethods;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddScoped<IClojureParserService, ClojureParserService>();
-builder.Services.AddScoped<IClojureTokenizerService, ClojureTokenizerService>();
+builder.Services.AddScoped<IClojureParserServiceFactory, ClojureParserServiceFactory>();
+builder.Services.AddScoped<IClojureTokenizerServiceFactory, ClojureTokenizerServiceFactory>();
 builder.Services.AddScoped<ISyntaxHighlighter, SyntaxHighlighterService>();
-builder.Services.AddScoped<IClojureTokenizerService, ClojureTokenizerService>();
 
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
