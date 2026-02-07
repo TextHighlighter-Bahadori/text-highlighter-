@@ -1,11 +1,13 @@
+using System.Text;
 using ClojureHighlighter.Application;
+using ClojureHighlighter.Infrastracture.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClojureHighlighter.Infrastracture;
 
 [ApiController]
 [Route("/api/clojure/[controller]")]
-public class HighlightController
+public class HighlightController : ControllerBase
 {
     private readonly ISyntaxHighlighter _syntaxHighlighter;
     private readonly ILogger<HighlightController> _logger;
@@ -17,10 +19,32 @@ public class HighlightController
         _logger = logger;
     }
 
-    [HttpGet]
-    public List<HighlightedToken> GetHighlightedCode([FromBody] string sourceCode)
+    [HttpPost]
+    public IActionResult GetHighlightedCode(HighlightRequest highlightRequest)
     {
+        var highlightedTokens = _syntaxHighlighter.HighlightCode(highlightRequest.SourceCode);
+        return Ok(new
+        {
+            highlightedTokens = highlightedTokens
+        });
+    }
+
+
+    [HttpPost]
+    public async Task<IActionResult> GetHighlightedCode(IFormFile formFile)
+    {
+        byte[] content;
+        using (var stream = formFile.OpenReadStream())
+        {
+            content = new byte[stream.Length];
+            await stream.ReadExactlyAsync(content, 0, (int)stream.Length);
+        }
+
+        string sourceCode = Encoding.ASCII.GetString(content);
         var highlightedTokens = _syntaxHighlighter.HighlightCode(sourceCode);
-        return highlightedTokens;
+        return Ok(new
+        {
+            highlightedTokens = highlightedTokens
+        });
     }
 }
