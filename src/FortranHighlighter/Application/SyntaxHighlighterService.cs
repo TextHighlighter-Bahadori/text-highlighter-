@@ -10,7 +10,7 @@ public class HighlightedToken
     public string Color { get; set; }
 }
 
-public class SyntaxHighlighterService : ISyntaxHighlighter
+public class SyntaxHighlighterService : ISyntaxHighlighterService
 {
     private readonly Dictionary<int, string> _positionToColor;
 
