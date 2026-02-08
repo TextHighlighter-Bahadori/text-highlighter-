@@ -1,7 +1,0 @@
-﻿services:
-  clojurehighlighter:
-    image: clojurehighlighter
-    build:
-      context: .
-      dockerfile: ClojureHighlighter/Dockerfile
-
