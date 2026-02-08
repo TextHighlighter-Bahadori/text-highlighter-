@@ -1,6 +1,6 @@
 namespace FortranHighlighter.Domain.ASTNode;
 
-public class ProgramNode
+public class ProgramNode : AstNode
 {
     public Token.Token ProgramKeyword { get; set; }
     public Token.Token ProgramName { get; set; }
