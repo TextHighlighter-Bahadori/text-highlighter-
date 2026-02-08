@@ -3,5 +3,5 @@
     image: clojurehighlighter
     build:
       context: .
-      dockerfile: ClojureHighlighter/Dockerfile
+      dockerfile: Dockerfile
 
