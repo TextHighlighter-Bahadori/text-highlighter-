@@ -1,0 +1,72 @@
+namespace FortranHighlighter.Domain.Token;
+
+public enum TokenType
+{
+    Integer,
+    Real,
+    String,
+    Logical,
+    
+    Program,
+    Subroutine,
+    Function,
+    End,
+    Integer_Keyword,
+    Real_Keyword,
+    Character_Keyword,
+    Logical_Keyword,
+    Dimension,
+    Parameter,
+    Implicit,
+    None,
+    
+    Do,
+    EndDo,
+    If,
+    Then,
+    Else,
+    ElseIf,
+    EndIf,
+    Select,
+    Case,
+    EndSelect,
+    
+    Call,
+    Return,
+    Continue,
+    Stop,
+    Read,
+    Write,
+    Print,
+    Open,
+    Close,
+    
+    Assignment,
+    Plus,
+    Minus,
+    Multiply,
+    Divide,
+    Power,
+    Equals,
+    NotEquals,
+    LessThan,
+    GreaterThan,
+    LessOrEqual,
+    GreaterOrEqual,
+    And,
+    Or,
+    Not,
+    
+   
+    LeftParen,
+    RightParen,
+    Comma,
+    Colon,
+    DoubleColon,
+    
+    Identifier,
+    Comment,
+    Whitespace,
+    Label,
+    EOF
+}
