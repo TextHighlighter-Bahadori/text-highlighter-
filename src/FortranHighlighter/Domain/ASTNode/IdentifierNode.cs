@@ -1,7 +1,7 @@
 namespace FortranHighlighter.Domain.ASTNode;
 using FortranHighlighter.Domain.Token;
 
-public class IdentifierNode
+public class IdentifierNode : AstNode
 {
     public Token Token { get; set; }
     public IdentifierRole Role { get; set; }
