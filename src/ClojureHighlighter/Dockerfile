@@ -7,15 +7,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["ClojureHighlighter/ClojureHighlighter.csproj", "ClojureHighlighter/"]
+COPY ["src/ClojureHighlighter/ClojureHighlighter.csproj", "ClojureHighlighter/"]
 RUN dotnet restore "ClojureHighlighter/ClojureHighlighter.csproj"
-COPY . .
+
+
+COPY src/ClojureHighlighter/ ClojureHighlighter/
+
+# Build the project
 WORKDIR "/src/ClojureHighlighter"
-RUN dotnet build "./ClojureHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "ClojureHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ClojureHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "ClojureHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
