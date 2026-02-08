@@ -1,3 +1,4 @@
+using FortranHighlighter.Application.FactoryMethods;
 using FortranHighlighter.Domain;
 using FortranHighlighter.Domain.ASTNode;
 using FortranHighlighter.Domain.Token;
@@ -13,18 +14,23 @@ public class HighlightedToken
 public class SyntaxHighlighterService : ISyntaxHighlighterService
 {
     private readonly Dictionary<int, string> _positionToColor;
+    private readonly IFortranTokenizerServiceFactory _tokenizerServiceFactory;
+    private readonly IFortranParserServiceFactory _parserServiceFactory;
 
-    public SyntaxHighlighterService()
+    public SyntaxHighlighterService(IFortranTokenizerServiceFactory tokenizerServiceFactory,
+        IFortranParserServiceFactory parserServiceFactory)
     {
+        _tokenizerServiceFactory = tokenizerServiceFactory;
+        _parserServiceFactory = parserServiceFactory;
         _positionToColor = new Dictionary<int, string>();
     }
 
     public List<HighlightedToken> HighlightCode(string code)
     {
-        var tokenizerService = new FortranTokenizerService(code);
+        var tokenizerService = _tokenizerServiceFactory.Create(code);
         var tokens = tokenizerService.Tokenize();
 
-        var parserService = new FortranParserService(tokens);
+        var parserService = _parserServiceFactory.Create(tokens);
         var ast = parserService.Parse();
 
         foreach (var node in ast)

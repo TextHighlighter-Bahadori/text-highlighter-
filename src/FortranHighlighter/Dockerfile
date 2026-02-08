@@ -7,10 +7,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["src/FortranHighlighter/FortranHighlighter.csproj", "src/FortranHighlighter/"]
+COPY ["src/FortranHighlighter/FortranHighlighter.csproj", "FortranHighlighter/"]
 RUN dotnet restore "src/FortranHighlighter/FortranHighlighter.csproj"
 COPY . .
-WORKDIR "/src/src/FortranHighlighter"
+WORKDIR "/src/FortranHighlighter"
 RUN dotnet build "./FortranHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
