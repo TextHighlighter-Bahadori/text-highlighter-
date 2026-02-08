@@ -22,6 +22,15 @@ public class HighlightController : ControllerBase
     [HttpPost]
     public IActionResult GetHighlightedCode(HighlightRequest highlightRequest)
     {
+        if (highlightRequest.SourceCode.Length <= 10)
+        {
+            _logger.LogWarning("The source code length must be more than 10 characters");
+            return Problem(
+                statusCode: 400,
+                title: "Invalid length",
+                detail: "he source code length must be more than 10 characters");
+        }
+        _logger.LogInformation("request for highlighting the source code in string format");
         var highlightedTokens = _syntaxHighlighter.HighlightCode(highlightRequest.SourceCode);
         return Ok(new
         {
@@ -33,6 +42,16 @@ public class HighlightController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> GetHighlightedCode(IFormFile formFile)
     {
+        if (formFile.Length <= 10)
+        {
+            _logger.LogWarning("The source code length must be more than 10 characters");
+            return Problem(
+                statusCode: 400,
+                title: "Invalid length",
+                detail: "he source code length must be more than 10 characters");
+        }
+
+        _logger.LogInformation("request for highlighting the source code in string format");
         byte[] content;
         using (var stream = formFile.OpenReadStream())
         {

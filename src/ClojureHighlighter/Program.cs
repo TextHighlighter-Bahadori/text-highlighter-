@@ -12,6 +12,17 @@ builder.Services.AddScoped<ISyntaxHighlighter, SyntaxHighlighterService>();
 builder.Services.AddControllers();
 
 
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Extensions["traceId"] = 
+            context.HttpContext.TraceIdentifier;
+        context.ProblemDetails.Extensions["timestamp"] = 
+            DateTime.UtcNow;
+    };
+});
+
 /*
  * by default the telemetry data are sent via Grpc protocol
  */
