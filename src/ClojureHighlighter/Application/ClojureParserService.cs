@@ -1,0 +1,617 @@
+using ClojureHighlighter.Domain;
+using ClojureHighlighter.Domain.ASTNode;
+
+namespace ClojureHighlighter.Application;
+
+public class ClojureParserService : IClojureParserService
+{
+    private List<Token> _tokens;
+    private int _current;
+    
+    private readonly HashSet<string> _bindingForms = new ()
+    {
+        "let", "letfn", "binding", "loop", "for", "doseq"
+    };
+    
+    
+    public ClojureParserService(List<Token> tokens)
+    {
+        _tokens = tokens;
+        _current = 0;
+    }
+
+
+    public List<AstNode> Parse()
+    {
+        var nodes = new List<AstNode>();
+
+        while (!IsAtEnd())
+        {
+            SkipWhitespaceAndComments();
+            if (!IsAtEnd())
+            {
+                var node = ParseExpression();
+                nodes.Add(node);
+            }
+        }
+
+        return nodes;
+    }
+
+    private AstNode? ParseExpression()
+    {
+        SkipWhitespaceAndComments();
+
+        if (IsAtEnd())
+            return null;
+
+        Token current = CurrentToken();
+
+        switch (current.Type)
+        {
+            case TokenType.LeftParen:
+                return ParseList();
+            case TokenType.LeftBracket:
+                return ParseVector();
+            case TokenType.LeftBrace:
+                return ParseMap();
+            case TokenType.String:
+            case TokenType.Number:
+            case TokenType.Character:
+            case TokenType.Boolean:
+            case TokenType.Nil:
+                return ParseLiteral();
+            case TokenType.Keyword:
+                var lit = new LiteralNode(current);
+                Advance();
+                return lit;
+            case TokenType.Symbol:
+            case TokenType.SpecialForm:
+                return ParseSymbol();
+            default:
+                Advance();
+                return null;
+        }
+    }
+
+
+    private AstNode ParseList()
+    {
+        int startPos = CurrentToken().Position;
+        Advance(); // Skip '('
+        SkipWhitespaceAndComments();
+
+        if (IsAtEnd() || CurrentToken().Type == TokenType.RightParen)
+        {
+            if (!IsAtEnd()) Advance();
+            return new ListNode { StartPosition = startPos };
+        }
+
+       
+        Token firstToken = CurrentToken();
+
+        if (firstToken.Type == TokenType.SpecialForm || firstToken.Type == TokenType.Symbol)
+        {
+            string formName = firstToken.Value;
+
+            // Handle function definitions
+            if (formName == "defn" || formName == "defn-" || formName == "defmacro")
+            {
+                return ParseDefn(startPos, firstToken);
+            }
+
+            // Handle def
+            if (formName == "def")
+            {
+                return ParseDef(startPos, firstToken);
+            }
+
+            // Handle let forms
+            if (_bindingForms.Contains(formName))
+            {
+                return ParseLet(startPos, firstToken);
+            }
+
+            // Handle if forms
+            if (formName == "if" || formName == "if-not")
+            {
+                return ParseIf(startPos, firstToken);
+            }
+
+            // Handle fn (lambda)
+            if (formName == "fn")
+            {
+                return ParseLambda(startPos, firstToken);
+            }
+
+            // Handle ns
+            if (formName == "ns")
+            {
+                return ParseNamespace(startPos, firstToken);
+            }
+
+            // Otherwise, it's a function call
+            return ParseFunctionCall(startPos, firstToken);
+        }
+
+        // Generic list
+        return ParseGenericList(startPos);
+    }
+
+    private DefnNode ParseDefn(int startPos, Token defnToken)
+    {
+        var defnNode = new DefnNode
+        {
+            DefnKeyword = defnToken,
+            StartPosition = startPos,
+            IsPrivate = defnToken.Value == "defn-"
+        };
+
+        // Skip 'defn'
+        Advance();
+        SkipWhitespaceAndComments();
+
+
+        if (!IsAtEnd() && (CurrentToken().Type == TokenType.Symbol || CurrentToken().Type == TokenType.SpecialForm))
+        {
+            defnNode.FunctionName = new SymbolNode(CurrentToken(), SymbolRole.FunctionName);
+            Advance();
+        }
+
+        SkipWhitespaceAndComments();
+
+
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.String)
+        {
+            defnNode.Docstring = CurrentToken().Value;
+            Advance();
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.LeftBracket)
+        {
+            Advance();
+            SkipWhitespaceAndComments();
+
+            while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBracket)
+            {
+                if (CurrentToken().Type == TokenType.Symbol)
+                {
+                    defnNode.Parameters.Add(new SymbolNode(CurrentToken(), SymbolRole.Parameter));
+                }
+
+                Advance();
+                SkipWhitespaceAndComments();
+            }
+
+            if (!IsAtEnd()) Advance();
+        }
+
+        SkipWhitespaceAndComments();
+
+        // Parse body
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            AstNode? expr = ParseExpression();
+
+            defnNode.Body.Add(expr);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            defnNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return defnNode;
+    }
+
+
+    private DefNode ParseDef(int startPos, Token defToken)
+    {
+        var defNode = new DefNode
+        {
+            DefKeyword = defToken,
+            StartPosition = startPos
+        };
+
+        // Skip 'def'
+        Advance();
+        SkipWhitespaceAndComments();
+
+        // Parse variable name
+        if (!IsAtEnd() && (CurrentToken().Type == TokenType.Symbol || CurrentToken().Type == TokenType.SpecialForm))
+        {
+            defNode.VariableName = new SymbolNode(CurrentToken(), SymbolRole.Variable);
+            Advance();
+        }
+
+        SkipWhitespaceAndComments();
+
+        // Check for docstring
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.String)
+        {
+            defNode.Docstring = CurrentToken().Value;
+            Advance();
+            SkipWhitespaceAndComments();
+        }
+
+        // Parse value
+        if (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            defNode.Value = ParseExpression();
+        }
+
+        SkipWhitespaceAndComments();
+
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.RightParen)
+        {
+            defNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return defNode;
+    }
+
+
+    private LetNode ParseLet(int startPos, Token letToken)
+    {
+        var letNode = new LetNode
+        {
+            LetKeyword = letToken,
+            StartPosition = startPos
+        };
+
+        // Skip 'let'
+        Advance();
+        SkipWhitespaceAndComments();
+
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.LeftBracket)
+        {
+            Advance();
+            SkipWhitespaceAndComments();
+
+            while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBracket)
+            {
+                // Parse symbol
+                SymbolNode? bindingSymbol = null;
+                if (CurrentToken().Type == TokenType.Symbol)
+                {
+                    bindingSymbol = new SymbolNode(CurrentToken(), SymbolRole.LocalBinding);
+                    Advance();
+                    SkipWhitespaceAndComments();
+                }
+
+                // Parse value
+                AstNode? bindingValue = null;
+                if (!IsAtEnd() && CurrentToken().Type != TokenType.RightBracket)
+                {
+                    bindingValue = ParseExpression();
+                    SkipWhitespaceAndComments();
+                }
+
+                if (bindingSymbol != null)
+                {
+                    letNode.Bindings.Add(new BindingPair
+                    {
+                        Symbol = bindingSymbol,
+                        Value = bindingValue
+                    });
+                }
+            }
+
+            if (!IsAtEnd()) Advance(); // Skip ']'
+        }
+
+        SkipWhitespaceAndComments();
+
+        // Parse body
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            var expr = ParseExpression();
+
+            letNode.Body.Add(expr);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            letNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return letNode;
+    }
+
+
+    private IfNode ParseIf(int startPos, Token ifToken)
+    {
+        var ifNode = new IfNode
+        {
+            IfKeyword = ifToken,
+            StartPosition = startPos
+        };
+
+        // Skip 'if'
+        Advance();
+        SkipWhitespaceAndComments();
+
+        // Parse condition
+        if (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            ifNode.Condition = ParseExpression();
+            SkipWhitespaceAndComments();
+        }
+
+        // Parse then branch
+        if (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            ifNode.ThenBranch = ParseExpression();
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            ifNode.ElseBranch = ParseExpression();
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.RightParen)
+        {
+            ifNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return ifNode;
+    }
+
+    private LambdaNode ParseLambda(int startPos, Token fnToken)
+    {
+        var lambdaNode = new LambdaNode
+        {
+            FnKeyword = fnToken,
+            StartPosition = startPos
+        };
+
+        // Skip 'fn'
+        Advance();
+        SkipWhitespaceAndComments();
+
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.LeftBracket)
+        {
+            Advance();
+            SkipWhitespaceAndComments();
+
+            while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBracket)
+            {
+                if (CurrentToken().Type == TokenType.Symbol)
+                {
+                    lambdaNode.Parameters.Add(new SymbolNode(CurrentToken(), SymbolRole.Parameter));
+                }
+
+                Advance();
+                SkipWhitespaceAndComments();
+            }
+
+            if (!IsAtEnd()) Advance();
+        }
+
+        SkipWhitespaceAndComments();
+
+        // Parse body
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            var expr = ParseExpression();
+
+            lambdaNode.Body.Add(expr);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            lambdaNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return lambdaNode;
+    }
+
+
+    private NamespaceNode ParseNamespace(int startPos, Token nsToken)
+    {
+        var nsNode = new NamespaceNode
+        {
+            NsKeyword = nsToken,
+            StartPosition = startPos
+        };
+
+        // Skip 'ns'
+        Advance();
+        SkipWhitespaceAndComments();
+
+        // Parse namespace name
+        if (!IsAtEnd() && CurrentToken().Type == TokenType.Symbol)
+        {
+            nsNode.NamespaceName = new SymbolNode(CurrentToken(), SymbolRole.NamespaceAlias);
+            Advance();
+        }
+
+        SkipWhitespaceAndComments();
+
+        // Parse declarations
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            var expr = ParseExpression();
+
+            nsNode.Declarations.Add(expr);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            nsNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return nsNode;
+    }
+
+
+    private FunctionCallNode ParseFunctionCall(int startPos, Token functionToken)
+    {
+        var callNode = new FunctionCallNode
+        {
+            FunctionName = new SymbolNode(functionToken, SymbolRole.FunctionCall),
+            StartPosition = startPos
+        };
+
+        // Skip function name
+        Advance();
+        SkipWhitespaceAndComments();
+
+        // Parse arguments
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            var arg = ParseExpression();
+
+            callNode.Arguments.Add(arg);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            callNode.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return callNode;
+    }
+
+
+    private ListNode ParseGenericList(int startPos)
+    {
+        var list = new ListNode { StartPosition = startPos };
+
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
+        {
+            var expr = ParseExpression();
+
+            list.Elements.Add(expr);
+            SkipWhitespaceAndComments();
+        }
+
+        if (!IsAtEnd())
+        {
+            list.EndPosition = CurrentToken().Position;
+            Advance(); // Skip ')'
+        }
+
+        return list;
+    }
+
+
+    private VectorNode ParseVector()
+    {
+        var vector = new VectorNode { StartPosition = CurrentToken().Position };
+        Advance(); // Skip '['
+
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBracket)
+        {
+            SkipWhitespaceAndComments();
+            if (CurrentToken().Type != TokenType.RightBracket)
+            {
+                var expr = ParseExpression();
+
+                vector.Elements.Add(expr);
+            }
+        }
+
+        if (!IsAtEnd())
+        {
+            vector.EndPosition = CurrentToken().Position;
+            Advance();
+        }
+
+        return vector;
+    }
+
+
+    private MapNode ParseMap()
+    {
+        var map = new MapNode { StartPosition = CurrentToken().Position };
+        Advance(); // Skip '{'
+
+        while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
+        {
+            SkipWhitespaceAndComments();
+            if (CurrentToken().Type != TokenType.RightBrace)
+            {
+                var expr = ParseExpression();
+
+                map.Elements.Add(expr);
+            }
+        }
+
+        if (!IsAtEnd())
+        {
+            map.EndPosition = CurrentToken().Position;
+            Advance(); // Skip '}'
+        }
+
+        return map;
+    }
+
+
+    private LiteralNode ParseLiteral()
+    {
+        var literal = new LiteralNode(CurrentToken());
+        Advance();
+        return literal;
+    }
+
+    private SymbolNode ParseSymbol()
+    {
+        var symbol = new SymbolNode(CurrentToken(), SymbolRole.Unknown);
+        Advance();
+        return symbol;
+    }
+
+    private void SkipWhitespaceAndComments()
+    {
+        while (!IsAtEnd() &&
+               (CurrentToken().Type == TokenType.Whitespace ||
+                CurrentToken().Type == TokenType.Comment))
+        {
+            Advance();
+        }
+    }
+
+
+    private Token CurrentToken()
+    {
+        return _tokens[_current];
+    }
+
+
+    private Token PeekToken(int offset = 1)
+    {
+        int index = _current + offset;
+        if (index < _tokens.Count)
+            return _tokens[index];
+        return _tokens[_tokens.Count - 1];
+    }
+
+
+    private void Advance()
+    {
+        if (!IsAtEnd())
+            _current++;
+    }
+
+
+    private bool IsAtEnd()
+    {
+        return _current >= _tokens.Count || CurrentToken().Type == TokenType.EOF;
+    }
+}
