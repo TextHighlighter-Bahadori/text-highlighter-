@@ -1,0 +1,9 @@
+﻿services:
+  fortranhighlighter:
+    image: fortranhighlighter
+    build:
+      context: .
+      dockerfile: FortranHighlighter/Dockerfile
+
+
+

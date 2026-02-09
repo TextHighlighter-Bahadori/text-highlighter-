@@ -8,7 +8,7 @@ using OpenTelemetry.Trace;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IClojureParserServiceFactory, ClojureParserServiceFactory>();
 builder.Services.AddScoped<IClojureTokenizerServiceFactory, ClojureTokenizerServiceFactory>();
-builder.Services.AddScoped<ISyntaxHighlighter, SyntaxHighlighterService>();
+builder.Services.AddScoped<ISyntaxHighlighterService, SyntaxHighlighterService>();
 builder.Services.AddControllers();
 
 

@@ -10,7 +10,7 @@ public class HighlightedToken
     public string Color { get; set; }
 }
 
-public class SyntaxHighlighterService : ISyntaxHighlighter
+public class SyntaxHighlighterService : ISyntaxHighlighterService
 {
     private readonly IClojureParserServiceFactory _parserServiceFactory;
     private readonly IClojureTokenizerServiceFactory _tokenizerServiceFactory;

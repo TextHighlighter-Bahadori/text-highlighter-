@@ -9,13 +9,13 @@ namespace ClojureHighlighter.Infrastracture;
 [Route("/api/clojure/[controller]")]
 public class HighlightController : ControllerBase
 {
-    private readonly ISyntaxHighlighter _syntaxHighlighter;
+    private readonly ISyntaxHighlighterService _syntaxHighlighterService;
     private readonly ILogger<HighlightController> _logger;
 
 
-    public HighlightController(ISyntaxHighlighter syntaxHighlighter, ILogger<HighlightController> logger)
+    public HighlightController(ISyntaxHighlighterService syntaxHighlighterService, ILogger<HighlightController> logger)
     {
-        _syntaxHighlighter = syntaxHighlighter;
+        _syntaxHighlighterService = syntaxHighlighterService;
         _logger = logger;
     }
 
@@ -31,7 +31,7 @@ public class HighlightController : ControllerBase
                 detail: "he source code length must be more than 10 characters");
         }
         _logger.LogInformation("request for highlighting the source code in string format");
-        var highlightedTokens = _syntaxHighlighter.HighlightCode(highlightRequest.SourceCode);
+        var highlightedTokens = _syntaxHighlighterService.HighlightCode(highlightRequest.SourceCode);
         return Ok(new
         {
             highlightedTokens = highlightedTokens
@@ -60,7 +60,7 @@ public class HighlightController : ControllerBase
         }
 
         string sourceCode = Encoding.ASCII.GetString(content);
-        var highlightedTokens = _syntaxHighlighter.HighlightCode(sourceCode);
+        var highlightedTokens = _syntaxHighlighterService.HighlightCode(sourceCode);
         return Ok(new
         {
             highlightedTokens = highlightedTokens

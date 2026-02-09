@@ -1,6 +1,6 @@
 namespace ClojureHighlighter.Application;
 
-public interface ISyntaxHighlighter
+public interface ISyntaxHighlighterService
 {
     public List<HighlightedToken> HighlightCode(string code);
 }
