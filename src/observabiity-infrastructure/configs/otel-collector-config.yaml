@@ -19,11 +19,9 @@ processors:
     spike_limit_mib: 128
 
 exporters:
-  loki:
-    endpoint: http://loki:3100/loki/api/v1/push
   
   otlp/tempo:
-    endpoint: tempo:4317
+    endpoint: "tempo:4317"
     tls:
       insecure: true
 
@@ -32,7 +30,7 @@ exporters:
     namespace: highlighter
   
   otlphttp/loki:
-    endpoint: loki:9096  #grpc 
+    endpoint: "loki:9096"  #grpc 
     tls:
       insecure: true
 
@@ -56,10 +54,3 @@ service:
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [prometheus]
-
-  # Telemetry about the collector itself
-  telemetry:
-    logs:
-      level: info
-    metrics:
-      address: 0.0.0.0:8888
