@@ -4,6 +4,18 @@
     build:
       context: .
       dockerfile: FortranHighlighter/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - OTLP_Receiver_Endpoint=otel-collector:4317
+    networks:
+      highlighter-network:
+      
 
 
 
+
+networks:
+  highlighter-network:
+    name: highlighter-network
+    driver: bridge

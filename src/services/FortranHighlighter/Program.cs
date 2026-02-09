@@ -35,7 +35,7 @@ builder.Services.AddOpenTelemetry()
         .AddAspNetCoreInstrumentation()
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("your-endpoint-here/v1/traces");
+            options.Endpoint = new Uri(builder.Configuration["OTLP_Receiver_Endpoint"]!);
             options.Protocol = OtlpExportProtocol.Grpc;
         }))
     .WithMetrics(metrics => metrics
@@ -43,7 +43,7 @@ builder.Services.AddOpenTelemetry()
         .AddAspNetCoreInstrumentation()
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("your-endpoint-here/v1/traces");
+            options.Endpoint = new Uri(builder.Configuration["OTLP_Receiver_Endpoint"]!);
             options.Protocol = OtlpExportProtocol.Grpc;
         }));
 
@@ -56,7 +56,7 @@ builder.Logging.AddOpenTelemetry(logging =>
         .AddService(serviceName: builder.Environment.ApplicationName));
     logging.AddOtlpExporter(options =>
     {
-        options.Endpoint = new Uri("your-endpoint-here/v1/traces");
+        options.Endpoint = new Uri(builder.Configuration["OTLP_Receiver_Endpoint"]!);
         options.Protocol = OtlpExportProtocol.Grpc;
     });
 });

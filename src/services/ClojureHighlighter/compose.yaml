@@ -4,4 +4,15 @@
     build:
       context: .
       dockerfile: Dockerfile
+    networks:
+      highlighter-network:
+    ports:
+      - "5001:5001"
+    environment:
+      - OTLP_Receiver_Endpoint=otel-collector:4317
 
+
+networks:
+  highlighter-network:
+    name: highlighter-network
+    driver: bridge

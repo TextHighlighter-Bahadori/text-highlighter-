@@ -1,5 +1,6 @@
 using ClojureHighlighter.Application;
 using ClojureHighlighter.Application.FactoryMethods;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -16,9 +17,9 @@ builder.Services.AddProblemDetails(options =>
 {
     options.CustomizeProblemDetails = context =>
     {
-        context.ProblemDetails.Extensions["traceId"] = 
+        context.ProblemDetails.Extensions["traceId"] =
             context.HttpContext.TraceIdentifier;
-        context.ProblemDetails.Extensions["timestamp"] = 
+        context.ProblemDetails.Extensions["timestamp"] =
             DateTime.UtcNow;
     };
 });
@@ -30,11 +31,19 @@ builder.Services.AddOpenTelemetry()
     .WithTracing(tracing => tracing
         .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
         .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter())
+        .AddOtlpExporter(options =>
+        {
+            options.Endpoint = new Uri(builder.Configuration["OTLP_Receiver_Endpoint"]!);
+            options.Protocol = OtlpExportProtocol.Grpc;
+        }))
     .WithMetrics(metrics => metrics
         .ConfigureResource(resource => resource.AddService(builder.Environment.ApplicationName))
         .AddAspNetCoreInstrumentation()
-        .AddOtlpExporter());
+        .AddOtlpExporter(options =>
+        {
+            options.Endpoint = new Uri(builder.Configuration["OTLP_Receiver_Endpoint"]!);
+            options.Protocol = OtlpExportProtocol.Grpc;
+        }));
 
 
 builder.Logging.AddOpenTelemetry(logging =>
@@ -42,8 +51,12 @@ builder.Logging.AddOpenTelemetry(logging =>
     logging.IncludeFormattedMessage = true;
     logging.IncludeScopes = true;
     logging.SetResourceBuilder(ResourceBuilder.CreateDefault()
-        .AddService(serviceName: builder.Environment.ApplicationName));
-    logging.AddOtlpExporter();
+            .AddService(serviceName: builder.Environment.ApplicationName))
+        .AddOtlpExporter(options =>
+        {
+            options.Endpoint = new Uri(builder.Configuration["OTLP_Receiver_Endpoint"]!);
+            options.Protocol = OtlpExportProtocol.Grpc;
+        });
 });
 
 
