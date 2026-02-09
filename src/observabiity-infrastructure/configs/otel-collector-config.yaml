@@ -31,6 +31,10 @@ exporters:
     endpoint: "0.0.0.0:8889"
     namespace: highlighter
   
+  otlphttp/loki:
+    endpoint: loki:9096  #grpc 
+    tls:
+      insecure: true
 
 
 service:
@@ -39,7 +43,7 @@ service:
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [loki]
+      exporters: [otlphttp/loki]
     
     # Traces pipeline: OTLP → Tempo
     traces:
