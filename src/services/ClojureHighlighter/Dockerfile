@@ -7,11 +7,11 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["src/ClojureHighlighter/ClojureHighlighter.csproj", "ClojureHighlighter/"]
-RUN dotnet restore "ClojureHighlighter/ClojureHighlighter.csproj"
+COPY ["src/services/ClojureHighlighter/ClojureHighlighter.csproj", "services/ClojureHighlighter/"]
+RUN dotnet restore "services/ClojureHighlighter/ClojureHighlighter.csproj"
 
 
-COPY src/ClojureHighlighter/ ClojureHighlighter/
+COPY src/services/ClojureHighlighter/ services/ClojureHighlighter/
 
 # Build the project
 WORKDIR "/src/ClojureHighlighter"
