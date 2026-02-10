@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
@@ -13,19 +11,20 @@ services:
       - "4318:4318" #Http
     networks:
       - highlighter-network
-    restart: unless-stopped
-
+  
+  
   loki:
     image: grafana/loki:latest
     container_name: loki
     ports:
       - "3100:3100"
+    user: "0:0"
     volumes:
-      - configs/loki-config.yaml:/etc/loki/local-config.yaml
+      - ./configs/loki-config.yaml:/etc/loki/local-config.yaml
       - ./data/loki-data:/loki
     networks:
       - highlighter-network
-    restart: unless-stopped
+
 
   tempo:
     image: grafana/tempo:latest
@@ -38,7 +37,7 @@ services:
       - "3200:3200"
     networks:
       - highlighter-network
-    restart: unless-stopped
+    user: "0:0"
 
   prometheus:
     image: prom/prometheus:latest
@@ -51,9 +50,10 @@ services:
       - ./data/prometheus-data:/prometheus
     ports:
       - "9090:9090"
+    user: "0:0"
     networks:
       - highlighter-network
-    restart: unless-stopped
+
 
   grafana:
     image: grafana/grafana:latest
@@ -72,7 +72,7 @@ services:
       - loki
       - tempo
       - prometheus
-    restart: unless-stopped
+
 
 networks:
   highlighter-network:

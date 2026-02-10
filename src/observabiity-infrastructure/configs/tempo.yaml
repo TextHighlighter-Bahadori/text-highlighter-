@@ -1,8 +1,6 @@
-#the 3200 port is for exposing the traces for like grafana.
 server:
   http_listen_port: 3200
 
-#the port 4317 which uses grpc, is for receiving the data from collector in this case
 distributor:
   receivers:
     otlp:
@@ -19,8 +17,3 @@ storage:
       path: /tmp/tempo/traces
     wal:
       path: /tmp/tempo/wal
-
-compactor:
-  ring:
-    kvstore:
-      store: memberlist

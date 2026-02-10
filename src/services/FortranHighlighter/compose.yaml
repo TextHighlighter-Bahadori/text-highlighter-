@@ -3,7 +3,7 @@
     image: fortranhighlighter
     build:
       context: .
-      dockerfile: FortranHighlighter/Dockerfile
+      dockerfile: src/services/FortranHighlighter/Dockerfile
     ports:
       - "5000:5000"
     environment:

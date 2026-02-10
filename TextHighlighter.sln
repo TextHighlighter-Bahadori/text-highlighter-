@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClojureHighlighter", "src\ClojureHighlighter\ClojureHighlighter.csproj", "{43E8F3EF-000B-4C96-BAC0-1A5802570F11}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FortranHighlighter", "src\services\FortranHighlighter\FortranHighlighter.csproj", "{D3A0472E-E23A-491C-ACDF-2B4801D67D42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FortranHighlighter", "src\FortranHighlighter\FortranHighlighter.csproj", "{3E593960-22CB-4A7D-8579-E5068B2463C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClojureHighlighter", "src\services\ClojureHighlighter\ClojureHighlighter.csproj", "{20FC2930-FFFF-4596-BE1D-9005B2DE8C4E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,14 +10,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{43E8F3EF-000B-4C96-BAC0-1A5802570F11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{43E8F3EF-000B-4C96-BAC0-1A5802570F11}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{43E8F3EF-000B-4C96-BAC0-1A5802570F11}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{43E8F3EF-000B-4C96-BAC0-1A5802570F11}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3E593960-22CB-4A7D-8579-E5068B2463C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3E593960-22CB-4A7D-8579-E5068B2463C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3E593960-22CB-4A7D-8579-E5068B2463C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3E593960-22CB-4A7D-8579-E5068B2463C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3A0472E-E23A-491C-ACDF-2B4801D67D42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3A0472E-E23A-491C-ACDF-2B4801D67D42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3A0472E-E23A-491C-ACDF-2B4801D67D42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3A0472E-E23A-491C-ACDF-2B4801D67D42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20FC2930-FFFF-4596-BE1D-9005B2DE8C4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20FC2930-FFFF-4596-BE1D-9005B2DE8C4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20FC2930-FFFF-4596-BE1D-9005B2DE8C4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20FC2930-FFFF-4596-BE1D-9005B2DE8C4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

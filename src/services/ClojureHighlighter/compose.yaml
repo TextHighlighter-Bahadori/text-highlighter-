@@ -3,7 +3,7 @@
     image: clojurehighlighter
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: src/services/ClojureHighlighter/Dockerfile
     networks:
       highlighter-network:
     ports:

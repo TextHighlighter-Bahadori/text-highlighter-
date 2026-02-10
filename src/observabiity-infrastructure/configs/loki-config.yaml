@@ -16,21 +16,18 @@ common:
     kvstore:
       store: inmemory
 
-query_range:
-  results_cache:
-    cache:
-      embedded_cache:
-        enabled: true
-        max_size_mb: 100
-
-otlp:
-  grpc_enabled: true
-  http_enabled: true
+# OTLP configuration goes in distributor for Loki 3.x
+distributor:
+  otlp_config:
+  # This is optional - only needed if you want to customize
+  # which resource attributes become index labels
+  # Leave empty to use defaults
 
 limits_config:
   allow_structured_metadata: true
   reject_old_samples: true
   reject_old_samples_max_age: 168h
+ 
 
 schema_config:
   configs:
