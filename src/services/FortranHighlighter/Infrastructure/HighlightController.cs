@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FortranHighlighter.Infrastructure;
 
 [ApiController]
-[Route("/api/clojure/[controller]")]
+[Route("/api/fortran/[controller]")]
 public class HighlightController : ControllerBase
 {
     private readonly ISyntaxHighlighterService _syntaxHighlighterService;

@@ -6,7 +6,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "clojure-highlighter",
-          "Port": 6000
+          "Port": 8080
         }
       ],
       "UpstreamHttpMethod": ["Post","Options"],
@@ -19,7 +19,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "fortran-highlighter",
-          "Port": 6001
+          "Port": 8080
         }
       ],
       "UpstreamHttpMethod": ["Post","Options"],
@@ -31,7 +31,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "csharp-highlighter",
-          "Port": 6002
+          "Port": 8080
         }
       ],
       "UpstreamHttpMethod": ["Post","Options"],
@@ -39,6 +39,18 @@
     }
   ],
   
+  
+  "DynamicRoutes": [
+    {
+      "RateLimitOptions": {
+        "Limit": 5,
+        "Period": "1m",
+        "HttpStatusCode": 429,
+        "EnableRateLimiting": true,
+        "PeriodTimespan": 30
+      }
+    }
+  ],
   
   "GlobalConfiguration": {
     "BaseUrl": "http://localhost:8080"

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ClojureHighlighter")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e28d06b7306d327318333735c3dd76166179160c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+52ccb993bc296e4593a52a2f9be436a7b37876b1")]
 [assembly: System.Reflection.AssemblyProductAttribute("ClojureHighlighter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ClojureHighlighter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

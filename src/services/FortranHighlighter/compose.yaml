@@ -5,7 +5,7 @@
       context: ../../../
       dockerfile: src/services/FortranHighlighter/Dockerfile
     ports:
-      - "6001:6001"
+      - "7000:8080"
     environment:
       - OTLP_Receiver_Endpoint=otel-collector:4317
     hostname: fortran-highlighter

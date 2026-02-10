@@ -8,7 +8,7 @@
     networks:
       highlighter-network:
     ports:
-      - "6000:6000"
+      - "6000:8080"
     environment:
       - OTLP_Receiver_Endpoint=otel-collector:4317
 

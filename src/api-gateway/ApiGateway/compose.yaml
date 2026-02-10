@@ -2,7 +2,7 @@
   apigateway:
     image: apigateway
     build:
-      context: .
+      context: ../../../
       dockerfile: src/api-gateway/ApiGateway/Dockerfile
     ports:
       - "8080:8080"

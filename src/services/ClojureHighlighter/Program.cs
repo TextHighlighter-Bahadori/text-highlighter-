@@ -59,6 +59,8 @@ builder.Logging.AddOpenTelemetry(logging =>
         });
 });
 
+builder.Logging.AddConsole();
+
 
 var app = builder.Build();
 
