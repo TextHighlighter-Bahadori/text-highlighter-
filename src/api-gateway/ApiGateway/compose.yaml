@@ -1,9 +1,10 @@
 ﻿services:
-  apigateway:
-    image: apigateway
+  api-gateway:
+    image: api-gateway
     build:
       context: ../../../
       dockerfile: src/api-gateway/ApiGateway/Dockerfile
+    hostname: api-gateway
     ports:
       - "8080:8080"
     networks:

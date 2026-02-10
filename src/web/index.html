@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syntax Highlighter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .input-section, .output-section {
+            padding: 30px;
+        }
+
+        .input-section {
+            border-right: 2px solid #e0e0e0;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        select, input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-method {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-method button {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .input-method button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .input-method button:hover {
+            border-color: #667eea;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-upload-area {
+            display: none;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-area.active {
+            display: block;
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .highlight-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .highlight-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .highlight-btn:active {
+            transform: translateY(0);
+        }
+
+        .highlight-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .output-area {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            min-height: 400px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .output-area.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 4px solid #c33;
+        }
+
+        .line-numbers {
+            display: inline-block;
+            color: #858585;
+            user-select: none;
+            margin-right: 15px;
+            text-align: right;
+            min-width: 30px;
+        }
+
+        .code-line {
+            display: block;
+        }
+
+        .token {
+            white-space: pre-wrap;
+        }
+
+        @media (max-width: 968px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .input-section {
+                border-right: none;
+                border-bottom: 2px solid #e0e0e0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎨 Syntax Highlighter</h1>
+        <p>Upload or paste your code for beautiful syntax highlighting</p>
+    </div>
+
+    <div class="content">
+        <div class="input-section">
+            <h2 class="section-title">Input</h2>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="language">Select Language:</label>
+                    <select id="language">
+                        <option value="clojure">Clojure</option>
+                        <option value="fortran">Fortran</option>
+                        <option value="csharp">C#</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Input Method:</label>
+                    <div class="input-method">
+                        <button id="textBtn" class="active">Text Input</button>
+                        <button id="fileBtn">File Upload</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="textInputArea">
+                <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
+            </div>
+
+            <div id="fileInputArea" class="file-upload-area">
+                <div>
+                    <p style="font-size: 48px; margin-bottom: 10px;">📁</p>
+                    <p style="font-size: 16px; font-weight: 500; margin-bottom: 5px;">
+                        Drop your file here or click to browse
+                    </p>
+                    <p style="font-size: 14px; color: #999;">
+                        Supported formats: .clj, .f, .f90, .cs, .txt
+                    </p>
+                    <input type="file" id="fileInput" style="display: none;" accept=".clj,.f,.f90,.cs,.txt">
+                </div>
+                <div id="fileInfo" class="file-info"></div>
+            </div>
+
+            <button id="highlightBtn" class="highlight-btn">
+                ✨ Highlight Code
+            </button>
+
+            <div id="errorContainer"></div>
+        </div>
+
+        <div class="output-section">
+            <h2 class="section-title">Output</h2>
+            <div id="output" class="output-area empty">
+                Highlighted code will appear here...
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // DOM Elements
+    const textBtn = document.getElementById('textBtn');
+    const fileBtn = document.getElementById('fileBtn');
+    const textInputArea = document.getElementById('textInputArea');
+    const fileInputArea = document.getElementById('fileInputArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const codeInput = document.getElementById('codeInput');
+    const languageSelect = document.getElementById('language');
+    const highlightBtn = document.getElementById('highlightBtn');
+    const output = document.getElementById('output');
+    const errorContainer = document.getElementById('errorContainer');
+
+    let currentInputMode = 'text';
+    let uploadedFile = null;
+
+    // API endpoints
+    const API_ENDPOINTS = {
+        clojure: '/api/clojure/Highlight',
+        fortran: '/api/fortran/Highlight',
+        csharp: '/csharp/Highlight'
+    };
+
+    // Input mode switching
+    textBtn.addEventListener('click', () => {
+        currentInputMode = 'text';
+        textBtn.classList.add('active');
+        fileBtn.classList.remove('active');
+        textInputArea.style.display = 'block';
+        fileInputArea.classList.remove('active');
+        uploadedFile = null;
+        fileInfo.textContent = '';
+    });
+
+    fileBtn.addEventListener('click', () => {
+        currentInputMode = 'file';
+        fileBtn.classList.add('active');
+        textBtn.classList.remove('active');
+        textInputArea.style.display = 'none';
+        fileInputArea.classList.add('active');
+    });
+
+    // File upload handling
+    fileInputArea.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        handleFileSelect(e.target.files[0]);
+    });
+
+    // Drag and drop
+    fileInputArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileInputArea.classList.add('dragover');
+    });
+
+    fileInputArea.addEventListener('dragleave', () => {
+        fileInputArea.classList.remove('dragover');
+    });
+
+    fileInputArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileInputArea.classList.remove('dragover');
+        handleFileSelect(e.dataTransfer.files[0]);
+    });
+
+    function handleFileSelect(file) {
+        if (!file) return;
+
+        uploadedFile = file;
+        fileInfo.textContent = `📄 Selected: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+    }
+
+    // Highlight button
+    highlightBtn.addEventListener('click', async () => {
+        errorContainer.innerHTML = '';
+
+        let code = '';
+
+        if (currentInputMode === 'text') {
+            code = codeInput.value.trim();
+            if (!code) {
+                showError('Please enter some code to highlight.');
+                return;
+            }
+        } else {
+            if (!uploadedFile) {
+                showError('Please select a file to upload.');
+                return;
+            }
+            code = await readFileAsText(uploadedFile);
+        }
+
+        await highlightCode(code);
+    });
+
+    async function readFileAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(e);
+            reader.readAsText(file);
+        });
+    }
+
+    async function highlightCode(code) {
+        const language = languageSelect.value;
+        const endpoint = API_ENDPOINTS[language];
+
+        // Show loading state
+        output.classList.remove('empty');
+        output.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Highlighting code...</p>
+                </div>
+            `;
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: code })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const highlightedTokens = await response.json();
+            renderHighlightedCode(highlightedTokens);
+
+        } catch (error) {
+            console.error('Error:', error);
+            showError(`Failed to highlight code: ${error.message}`);
+            output.innerHTML = '<div class="empty">Error occurred during highlighting</div>';
+            output.classList.add('empty');
+        }
+    }
+
+    function renderHighlightedCode(tokens) {
+        if (!tokens || tokens.length === 0) {
+            output.innerHTML = '<div class="empty">No tokens received</div>';
+            output.classList.add('empty');
+            return;
+        }
+
+        // Group tokens by line
+        const lines = {};
+        tokens.forEach(highlightedToken => {
+            const token = highlightedToken.Token || highlightedToken.token;
+            const color = highlightedToken.Color || highlightedToken.color;
+
+            const lineNum = token.Line || token.line || 1;
+
+            if (!lines[lineNum]) {
+                lines[lineNum] = [];
+            }
+
+            lines[lineNum].push({
+                value: token.Value || token.value || '',
+                color: color || '#d4d4d4'
+            });
+        });
+
+        // Build HTML
+        let html = '';
+        const lineNumbers = Object.keys(lines).sort((a, b) => parseInt(a) - parseInt(b));
+
+        lineNumbers.forEach(lineNum => {
+            const lineTokens = lines[lineNum];
+            const lineContent = lineTokens.map(token =>
+                `<span class="token" style="color: ${token.color}">${escapeHtml(token.value)}</span>`
+            ).join('');
+
+            html += `<div class="code-line"><span class="line-numbers">${lineNum}</span>${lineContent}</div>`;
+        });
+
+        output.innerHTML = html;
+        output.classList.remove('empty');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showError(message) {
+        errorContainer.innerHTML = `<div class="error">❌ ${message}</div>`;
+    }
+</script>
+</body>
+</html>

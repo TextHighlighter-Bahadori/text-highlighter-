@@ -1,0 +1,15 @@
+services:
+  client-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"  
+    networks:
+      - highlighter-network
+        
+networks:
+  highlighter-network:
+    name: highlighter-network
+    external: true
+    driver: bridge
