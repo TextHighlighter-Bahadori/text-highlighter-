@@ -1,0 +1,17 @@
+﻿services:
+  apigateway:
+    image: apigateway
+    build:
+      context: .
+      dockerfile: src/api-gateway/ApiGateway/Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      highlighter-network:
+      
+
+
+networks:
+  highlighter-network:
+    name: highlighter-network
+    driver: bridge

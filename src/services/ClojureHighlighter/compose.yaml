@@ -4,10 +4,11 @@
     build:
       context: .
       dockerfile: src/services/ClojureHighlighter/Dockerfile
+    hostname: clojure-highlighter
     networks:
       highlighter-network:
     ports:
-      - "5001:5001"
+      - "6000:6000"
     environment:
       - OTLP_Receiver_Endpoint=otel-collector:4317
 
