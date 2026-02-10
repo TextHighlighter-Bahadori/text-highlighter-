@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "EcHdW4ZWOfZOPVOVV98tq7V9u0ap9/BSlWrk+TOQ9sE=",
+  "Source": "ClojureHighlighter",
+  "BasePath": "_content/ClojureHighlighter",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

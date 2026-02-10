@@ -2,7 +2,7 @@
   clojurehighlighter:
     image: clojurehighlighter
     build:
-      context: .
+      context: ../../../
       dockerfile: src/services/ClojureHighlighter/Dockerfile
     hostname: clojure-highlighter
     networks:
@@ -16,4 +16,5 @@
 networks:
   highlighter-network:
     name: highlighter-network
+    external: true
     driver: bridge
