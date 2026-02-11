@@ -470,7 +470,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ code: code })
+                body: JSON.stringify({ SourceCode: code })
             });
 
             if (!response.ok) {
@@ -494,8 +494,8 @@
             output.classList.add('empty');
             return;
         }
-
-        // Group tokens by line
+        tokens = tokens.highlightedTokens;
+        
         const lines = {};
         tokens.forEach(highlightedToken => {
             const token = highlightedToken.Token || highlightedToken.token;

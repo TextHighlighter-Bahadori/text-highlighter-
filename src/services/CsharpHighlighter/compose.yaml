@@ -1,0 +1,7 @@
+﻿services:
+  csharp-highlighter:
+    image: csharp-highlighter
+    build:
+      context: .
+      dockerfile: src/services/CsharpHighlighter/Dockerfile
+
