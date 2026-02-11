@@ -62,134 +62,208 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
 
     private void AssignColorsToNode(AstNode node)
     {
+        if (node == null)
+            return;
+            
         switch (node)
         {
             case UsingNode usingNode:
                 AssignColor(usingNode.UsingKeyword, "Purple", true);
-                AssignColor(usingNode.NamespaceName.Token, "Black");
+                if (usingNode.NamespaceName != null)
+                    AssignColor(usingNode.NamespaceName.Token, "Black");
                 break;
 
             case NamespaceNode ns:
                 AssignColor(ns.NamespaceKeyword, "Purple", true);
-                AssignColor(ns.NamespaceName.Token, "Black");
+                if (ns.NamespaceName != null)
+                    AssignColor(ns.NamespaceName.Token, "Black");
                 foreach (var member in ns.Members)
-                    AssignColorsToNode(member);
+                {
+                    if (member != null)
+                        AssignColorsToNode(member);
+                }
                 break;
 
             case ClassNode classNode:
                 foreach (var modifier in classNode.Modifiers)
                     AssignColor(modifier, "Blue", true);
                 AssignColor(classNode.ClassKeyword, "Blue", true);
-                AssignColor(classNode.ClassName.Token, "DarkCyan", true);
+                if (classNode.ClassName != null)
+                    AssignColor(classNode.ClassName.Token, "DarkCyan", true);
                 foreach (var baseType in classNode.BaseTypes)
-                    AssignColor(baseType.Token, "DarkCyan");
+                {
+                    if (baseType != null)
+                        AssignColor(baseType.Token, "DarkCyan");
+                }
                 foreach (var member in classNode.Members)
-                    AssignColorsToNode(member);
+                {
+                    if (member != null)
+                        AssignColorsToNode(member);
+                }
                 break;
 
             case InterfaceNode interfaceNode:
                 foreach (var modifier in interfaceNode.Modifiers)
                     AssignColor(modifier, "Blue", true);
                 AssignColor(interfaceNode.InterfaceKeyword, "Blue", true);
-                AssignColor(interfaceNode.InterfaceName.Token, "DarkCyan", true);
+                if (interfaceNode.InterfaceName != null)
+                    AssignColor(interfaceNode.InterfaceName.Token, "DarkCyan", true);
                 foreach (var baseInterface in interfaceNode.BaseInterfaces)
-                    AssignColor(baseInterface.Token, "DarkCyan");
+                {
+                    if (baseInterface != null)
+                        AssignColor(baseInterface.Token, "DarkCyan");
+                }
                 foreach (var member in interfaceNode.Members)
-                    AssignColorsToNode(member);
+                {
+                    if (member != null)
+                        AssignColorsToNode(member);
+                }
                 break;
 
             case EnumNode enumNode:
                 foreach (var modifier in enumNode.Modifiers)
                     AssignColor(modifier, "Blue", true);
                 AssignColor(enumNode.EnumKeyword, "Blue", true);
-                AssignColor(enumNode.EnumName.Token, "DarkCyan", true);
+                if (enumNode.EnumName != null)
+                    AssignColor(enumNode.EnumName.Token, "DarkCyan", true);
                 foreach (var member in enumNode.Members)
-                    AssignColor(member.Token, "DarkGray");
+                {
+                    if (member != null)
+                        AssignColor(member.Token, "DarkGray");
+                }
                 break;
 
             case MethodNode method:
                 foreach (var modifier in method.Modifiers)
                     AssignColor(modifier, "Blue", true);
-                AssignColor(method.ReturnTypeToken, "Blue");
-                AssignColor(method.MethodName.Token, "Yellow");
+                if (method.ReturnTypeToken != null)
+                    AssignColor(method.ReturnTypeToken, "Blue");
+                if (method.MethodName != null)
+                    AssignColor(method.MethodName.Token, "Yellow");
                 foreach (var param in method.Parameters)
-                    AssignColorsToNode(param);
+                {
+                    if (param != null)
+                        AssignColorsToNode(param);
+                }
                 foreach (var stmt in method.Body)
-                    AssignColorsToNode(stmt);
+                {
+                    if (stmt != null)
+                        AssignColorsToNode(stmt);
+                }
                 break;
 
             case ParameterNode param:
-                AssignColor(param.TypeToken, "Blue");
-                AssignColor(param.ParameterName.Token, "DarkGray");
+                if (param.TypeToken != null)
+                    AssignColor(param.TypeToken, "Blue");
+                if (param.ParameterName != null)
+                    AssignColor(param.ParameterName.Token, "DarkGray");
                 break;
 
             case PropertyNode property:
                 foreach (var modifier in property.Modifiers)
                     AssignColor(modifier, "Blue", true);
-                AssignColor(property.TypeToken, "Blue");
-                AssignColor(property.PropertyName.Token, "White");
+                if (property.TypeToken != null)
+                    AssignColor(property.TypeToken, "Blue");
+                if (property.PropertyName != null)
+                    AssignColor(property.PropertyName.Token, "White");
                 break;
 
             case FieldNode field:
                 foreach (var modifier in field.Modifiers)
                     AssignColor(modifier, "Blue", true);
-                AssignColor(field.TypeToken, "Blue");
-                AssignColor(field.FieldName.Token, "White");
-                AssignColorsToNode(field.Initializer);
+                if (field.TypeToken != null)
+                    AssignColor(field.TypeToken, "Blue");
+                if (field.FieldName != null)
+                    AssignColor(field.FieldName.Token, "White");
+                if (field.Initializer != null)
+                    AssignColorsToNode(field.Initializer);
                 break;
 
             case VariableDeclarationNode varDecl:
-                AssignColor(varDecl.TypeToken, "Blue");
-                AssignColor(varDecl.VariableName.Token, "White");
-                AssignColorsToNode(varDecl.Initializer);
+                if (varDecl.TypeToken != null)
+                    AssignColor(varDecl.TypeToken, "Blue");
+                if (varDecl.VariableName != null)
+                    AssignColor(varDecl.VariableName.Token, "White");
+                if (varDecl.Initializer != null)
+                    AssignColorsToNode(varDecl.Initializer);
                 break;
 
             case MethodCallNode call:
-                AssignColor(call.MethodName.Token, "Yellow");
-                AssignColorsToNode(call.Target);
+                if (call.MethodName != null)
+                    AssignColor(call.MethodName.Token, "Yellow");
+                if (call.Target != null)
+                    AssignColorsToNode(call.Target);
                 foreach (var arg in call.Arguments)
-                    AssignColorsToNode(arg);
+                {
+                    if (arg != null)
+                        AssignColorsToNode(arg);
+                }
                 break;
 
             case IfStatementNode ifStmt:
                 AssignColor(ifStmt.IfKeyword, "Purple", true);
-                AssignColorsToNode(ifStmt.Condition);
+                if (ifStmt.Condition != null)
+                    AssignColorsToNode(ifStmt.Condition);
                 foreach (var stmt in ifStmt.ThenBody)
-                    AssignColorsToNode(stmt);
+                {
+                    if (stmt != null)
+                        AssignColorsToNode(stmt);
+                }
                 foreach (var stmt in ifStmt.ElseBody)
-                    AssignColorsToNode(stmt);
+                {
+                    if (stmt != null)
+                        AssignColorsToNode(stmt);
+                }
                 break;
 
             case ForStatementNode forStmt:
                 AssignColor(forStmt.ForKeyword, "Purple", true);
-                AssignColorsToNode(forStmt.Initializer);
-                AssignColorsToNode(forStmt.Condition);
-                AssignColorsToNode(forStmt.Iterator);
+                if (forStmt.Initializer != null)
+                    AssignColorsToNode(forStmt.Initializer);
+                if (forStmt.Condition != null)
+                    AssignColorsToNode(forStmt.Condition);
+                if (forStmt.Iterator != null)
+                    AssignColorsToNode(forStmt.Iterator);
                 foreach (var stmt in forStmt.Body)
-                    AssignColorsToNode(stmt);
+                {
+                    if (stmt != null)
+                        AssignColorsToNode(stmt);
+                }
                 break;
 
             case WhileStatementNode whileStmt:
                 AssignColor(whileStmt.WhileKeyword, "Purple", true);
-                AssignColorsToNode(whileStmt.Condition);
+                if (whileStmt.Condition != null)
+                    AssignColorsToNode(whileStmt.Condition);
                 foreach (var stmt in whileStmt.Body)
-                    AssignColorsToNode(stmt);
+                {
+                    if (stmt != null)
+                        AssignColorsToNode(stmt);
+                }
                 break;
 
             case ReturnStatementNode returnStmt:
                 AssignColor(returnStmt.ReturnKeyword, "Purple", true);
-                AssignColorsToNode(returnStmt.Expression);
+                if (returnStmt.Expression != null)
+                    AssignColorsToNode(returnStmt.Expression);
                 break;
 
             case BlockNode block:
                 foreach (var stmt in block.Statements)
-                    AssignColorsToNode(stmt);
+                {
+                    if (stmt != null)
+                        AssignColorsToNode(stmt);
+                }
                 break;
 
             case AttributeNode attr:
-                AssignColor(attr.AttributeName.Token, "Gray");
+                if (attr.AttributeName != null)
+                    AssignColor(attr.AttributeName.Token, "Gray");
                 foreach (var arg in attr.Arguments)
-                    AssignColorsToNode(arg);
+                {
+                    if (arg != null)
+                        AssignColorsToNode(arg);
+                }
                 break;
 
             case SymbolNode symbol:
@@ -210,8 +284,8 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
                     SymbolRole.AttributeName => "Gray",
                     _ => "White"
                 };
-                AssignColor(symbol.Token, color,
-                    symbol.Role == SymbolRole.ClassName ||
+                AssignColor(symbol.Token, color, 
+                    symbol.Role == SymbolRole.ClassName || 
                     symbol.Role == SymbolRole.InterfaceName ||
                     symbol.Role == SymbolRole.EnumName);
                 break;
@@ -221,9 +295,13 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
                 break;
 
             case GenericTypeNode genericType:
-                AssignColor(genericType.TypeName.Token, "DarkCyan");
+                if (genericType.TypeName != null)
+                    AssignColor(genericType.TypeName.Token, "DarkCyan");
                 foreach (var typeArg in genericType.TypeArguments)
-                    AssignColor(typeArg.Token, "DarkCyan");
+                {
+                    if (typeArg != null)
+                        AssignColor(typeArg.Token, "DarkCyan");
+                }
                 break;
         }
     }

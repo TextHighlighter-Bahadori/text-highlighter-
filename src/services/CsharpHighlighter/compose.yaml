@@ -2,7 +2,7 @@
   csharp-highlighter:
     image: csharp-highlighter
     build:
-      context: .
+      context: ../../../
       dockerfile: src/services/CsharpHighlighter/Dockerfile
     ports:
       - "6002:8080"

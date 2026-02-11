@@ -1,6 +1,6 @@
 using CsharpHighlighter.Application;
-using CsharpHighlighter.Domain.ASTNode;
 using CsharpHighlighter.Domain.Token;
+using CsharpHighlighter.Domain.ASTNode;
 
 namespace CSharpHighlighter.Application;
 
@@ -45,7 +45,7 @@ public class CSharpParserService : ICSharpParserService
         return nodes;
     }
 
-    private AstNode? ParseTopLevel()
+    private AstNode ParseTopLevel()
     {
         SkipWhitespaceAndComments();
 
@@ -54,18 +54,23 @@ public class CSharpParserService : ICSharpParserService
 
         Token current = CurrentToken();
 
+        // Using directive
         if (current.Type == TokenType.Keyword && current.Value == "using")
             return ParseUsing();
 
+        // Namespace
         if (current.Type == TokenType.Keyword && current.Value == "namespace")
             return ParseNamespace();
 
+        // Attributes
         if (current.Type == TokenType.Attribute)
             return ParseAttribute();
 
+        // Type declarations
         if (IsTypeDeclaration())
             return ParseTypeDeclaration();
 
+        // Skip unknown tokens
         Advance();
         return null;
     }
@@ -79,9 +84,10 @@ public class CSharpParserService : ICSharpParserService
             StartPosition = startPos
         };
 
-        Advance();
+        Advance(); // Skip 'using'
         SkipWhitespaceAndComments();
 
+        // Parse namespace
         if (CurrentToken().Type == TokenType.Identifier)
         {
             var sb = new System.Text.StringBuilder();
@@ -121,7 +127,7 @@ public class CSharpParserService : ICSharpParserService
             StartPosition = startPos
         };
 
-        Advance();
+        Advance(); // Skip 'namespace'
         SkipWhitespaceAndComments();
 
         // Parse namespace name
@@ -159,10 +165,18 @@ public class CSharpParserService : ICSharpParserService
 
             while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
             {
+                int positionBefore = _current;
                 var member = ParseTopLevel();
                 if (member != null)
                     nsNode.Members.Add(member);
                 SkipWhitespaceAndComments();
+                
+                // Safety: prevent infinite loop
+                if (_current == positionBefore && !IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
+                {
+                    Advance();
+                    SkipWhitespaceAndComments();
+                }
             }
 
             if (!IsAtEnd())
@@ -178,7 +192,7 @@ public class CSharpParserService : ICSharpParserService
     private bool IsTypeDeclaration()
     {
         int saved = _current;
-
+        
         // Skip modifiers
         while (!IsAtEnd() && CurrentToken().Type == TokenType.Keyword &&
                _modifiers.Contains(CurrentToken().Value))
@@ -194,7 +208,7 @@ public class CSharpParserService : ICSharpParserService
         return isType;
     }
 
-    private AstNode? ParseTypeDeclaration()
+    private AstNode ParseTypeDeclaration()
     {
         var modifiers = new List<Token>();
 
@@ -278,10 +292,18 @@ public class CSharpParserService : ICSharpParserService
 
             while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
             {
+                int positionBefore = _current;
                 var member = ParseClassMember();
                 if (member != null)
                     classNode.Members.Add(member);
                 SkipWhitespaceAndComments();
+                
+                // Safety: prevent infinite loop
+                if (_current == positionBefore && !IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
+                {
+                    Advance();
+                    SkipWhitespaceAndComments();
+                }
             }
 
             if (!IsAtEnd())
@@ -350,10 +372,18 @@ public class CSharpParserService : ICSharpParserService
 
             while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
             {
+                int positionBefore = _current;
                 var member = ParseClassMember();
                 if (member != null)
                     interfaceNode.Members.Add(member);
                 SkipWhitespaceAndComments();
+                
+                // Safety: prevent infinite loop
+                if (_current == positionBefore && !IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
+                {
+                    Advance();
+                    SkipWhitespaceAndComments();
+                }
             }
 
             if (!IsAtEnd())
@@ -396,6 +426,8 @@ public class CSharpParserService : ICSharpParserService
 
             while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
             {
+                int positionBefore = _current;
+                
                 if (CurrentToken().Type == TokenType.Identifier)
                 {
                     enumNode.Members.Add(new SymbolNode(CurrentToken(), SymbolRole.FieldName));
@@ -418,6 +450,13 @@ public class CSharpParserService : ICSharpParserService
                 {
                     Advance();
                 }
+                
+                // Safety: prevent infinite loop
+                if (_current == positionBefore)
+                {
+                    Advance();
+                    SkipWhitespaceAndComments();
+                }
             }
 
             if (!IsAtEnd())
@@ -430,7 +469,7 @@ public class CSharpParserService : ICSharpParserService
         return enumNode;
     }
 
-    private AstNode? ParseClassMember()
+    private AstNode ParseClassMember()
     {
         SkipWhitespaceAndComments();
 
@@ -457,7 +496,7 @@ public class CSharpParserService : ICSharpParserService
 
         // Try to determine member type
         int saved = _current;
-        Token? typeToken = null;
+        Token typeToken = null;
 
         if (CurrentToken().Type == TokenType.Identifier || CurrentToken().Type == TokenType.Keyword)
         {
@@ -536,6 +575,7 @@ public class CSharpParserService : ICSharpParserService
 
             while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
             {
+                int positionBefore = _current;
                 var param = ParseParameter();
                 if (param != null)
                     methodNode.Parameters.Add(param);
@@ -543,6 +583,13 @@ public class CSharpParserService : ICSharpParserService
                 SkipWhitespaceAndComments();
 
                 if (CurrentToken().Type == TokenType.Comma)
+                {
+                    Advance();
+                    SkipWhitespaceAndComments();
+                }
+                
+                // Safety: prevent infinite loop
+                if (_current == positionBefore && CurrentToken().Type != TokenType.RightParen)
                 {
                     Advance();
                     SkipWhitespaceAndComments();
@@ -693,10 +740,18 @@ public class CSharpParserService : ICSharpParserService
 
             while (!IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
             {
+                int positionBefore = _current;
                 var stmt = ParseStatement();
                 if (stmt != null)
                     block.Statements.Add(stmt);
                 SkipWhitespaceAndComments();
+                
+                // Safety: if we didn't advance, force advance to prevent infinite loop
+                if (_current == positionBefore && !IsAtEnd() && CurrentToken().Type != TokenType.RightBrace)
+                {
+                    Advance();
+                    SkipWhitespaceAndComments();
+                }
             }
 
             if (!IsAtEnd())
@@ -709,7 +764,7 @@ public class CSharpParserService : ICSharpParserService
         return block;
     }
 
-    private AstNode? ParseStatement()
+    private AstNode ParseStatement()
     {
         SkipWhitespaceAndComments();
 
@@ -794,7 +849,8 @@ public class CSharpParserService : ICSharpParserService
         if (CurrentToken().Type == TokenType.LeftBrace)
         {
             var block = ParseBlock();
-            ifNode.ThenBody = block.Statements;
+            if (block != null)
+                ifNode.ThenBody = block.Statements;
         }
         else
         {
@@ -814,7 +870,8 @@ public class CSharpParserService : ICSharpParserService
             if (CurrentToken().Type == TokenType.LeftBrace)
             {
                 var block = ParseBlock();
-                ifNode.ElseBody = block.Statements;
+                if (block != null)
+                    ifNode.ElseBody = block.Statements;
             }
             else
             {
@@ -851,7 +908,8 @@ public class CSharpParserService : ICSharpParserService
         if (CurrentToken().Type == TokenType.LeftBrace)
         {
             var block = ParseBlock();
-            forNode.Body = block.Statements;
+            if (block != null)
+                forNode.Body = block.Statements;
         }
 
         return forNode;
@@ -883,7 +941,8 @@ public class CSharpParserService : ICSharpParserService
         if (CurrentToken().Type == TokenType.LeftBrace)
         {
             var block = ParseBlock();
-            whileNode.Body = block.Statements;
+            if (block != null)
+                whileNode.Body = block.Statements;
         }
 
         return whileNode;
@@ -960,7 +1019,7 @@ public class CSharpParserService : ICSharpParserService
         return expr;
     }
 
-    private AstNode? ParseExpression()
+    private AstNode ParseExpression()
     {
         SkipWhitespaceAndComments();
 
@@ -1000,6 +1059,7 @@ public class CSharpParserService : ICSharpParserService
 
                 while (!IsAtEnd() && CurrentToken().Type != TokenType.RightParen)
                 {
+                    int positionBefore = _current;
                     var arg = ParseExpression();
                     if (arg != null)
                         call.Arguments.Add(arg);
@@ -1008,6 +1068,12 @@ public class CSharpParserService : ICSharpParserService
 
                     if (CurrentToken().Type == TokenType.Comma)
                     {
+                        Advance();
+                        SkipWhitespaceAndComments();
+                    }
+                    else if (CurrentToken().Type != TokenType.RightParen && _current == positionBefore)
+                    {
+                        // Stuck - advance to prevent infinite loop
                         Advance();
                         SkipWhitespaceAndComments();
                     }
@@ -1089,13 +1155,11 @@ public class CSharpParserService : ICSharpParserService
                 else
                     break;
             }
-
             if (CurrentToken().Type == TokenType.Semicolon && braceCount == 0)
             {
                 Advance();
                 break;
             }
-
             Advance();
         }
     }

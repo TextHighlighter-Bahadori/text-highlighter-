@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CsharpHighlighter.Infrastructure;
 
 [ApiController]
-[Route("/api/clojure/[controller]")]
+[Route("/api/csharp/[controller]")]
 public class HighlightController : ControllerBase
 {
     private readonly ISyntaxHighlighterService _syntaxHighlighterService;

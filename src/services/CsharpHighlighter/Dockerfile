@@ -8,14 +8,14 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/services/CsharpHighlighter/CsharpHighlighter.csproj", "services/CsharpHighlighter/"]
-RUN dotnet restore "src/services/CsharpHighlighter/CsharpHighlighter.csproj"
-COPY . .
+RUN dotnet restore "services/CsharpHighlighter/CsharpHighlighter.csproj"
+COPY src/services/CsharpHighlighter/ services/CsharpHighlighter/
 WORKDIR "/src/services/CsharpHighlighter"
-RUN dotnet build "./CsharpHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "CsharpHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./CsharpHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "CsharpHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
