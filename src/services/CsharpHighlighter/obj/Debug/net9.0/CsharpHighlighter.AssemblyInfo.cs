@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CsharpHighlighter")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1c7864e5d5785deb7315b88ccd956c3dfdfb106e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6fe9d48fe6a70245d6c97f0e52fd38641b7084e0")]
 [assembly: System.Reflection.AssemblyProductAttribute("CsharpHighlighter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CsharpHighlighter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

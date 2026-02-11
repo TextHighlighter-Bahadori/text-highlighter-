@@ -7,10 +7,10 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["src/services/CsharpHighlighter/CsharpHighlighter.csproj", "src/services/CsharpHighlighter/"]
+COPY ["src/services/CsharpHighlighter/CsharpHighlighter.csproj", "services/CsharpHighlighter/"]
 RUN dotnet restore "src/services/CsharpHighlighter/CsharpHighlighter.csproj"
 COPY . .
-WORKDIR "/src/src/services/CsharpHighlighter"
+WORKDIR "/src/services/CsharpHighlighter"
 RUN dotnet build "./CsharpHighlighter.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

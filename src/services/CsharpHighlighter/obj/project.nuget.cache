@@ -1,8 +1,31 @@
 {
   "version": 2,
-  "dgSpecHash": "Fx+Xbdq4wHU=",
+  "dgSpecHash": "IxQ4EQnMW/k=",
   "success": true,
   "projectFilePath": "/home/mmdcj/Documents/RiderProjects/TLA_project/TextHighlighter/src/services/CsharpHighlighter/CsharpHighlighter.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.configuration/9.0.0/microsoft.extensions.configuration.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.configuration.abstractions/9.0.0/microsoft.extensions.configuration.abstractions.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.configuration.binder/9.0.0/microsoft.extensions.configuration.binder.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.dependencyinjection/9.0.0/microsoft.extensions.dependencyinjection.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.0/microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.diagnostics.abstractions/9.0.0/microsoft.extensions.diagnostics.abstractions.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.fileproviders.abstractions/9.0.0/microsoft.extensions.fileproviders.abstractions.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.hosting.abstractions/9.0.0/microsoft.extensions.hosting.abstractions.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.logging/9.0.0/microsoft.extensions.logging.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.logging.abstractions/9.0.0/microsoft.extensions.logging.abstractions.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.logging.configuration/9.0.0/microsoft.extensions.logging.configuration.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.options/9.0.0/microsoft.extensions.options.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.options.configurationextensions/9.0.0/microsoft.extensions.options.configurationextensions.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/microsoft.extensions.primitives/9.0.0/microsoft.extensions.primitives.9.0.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/opentelemetry/1.15.0/opentelemetry.1.15.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/opentelemetry.api/1.15.0/opentelemetry.api.1.15.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/opentelemetry.api.providerbuilderextensions/1.15.0/opentelemetry.api.providerbuilderextensions.1.15.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/opentelemetry.exporter.console/1.14.0/opentelemetry.exporter.console.1.14.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/opentelemetry.exporter.opentelemetryprotocol/1.15.0/opentelemetry.exporter.opentelemetryprotocol.1.15.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/opentelemetry.extensions.hosting/1.14.0/opentelemetry.extensions.hosting.1.14.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/opentelemetry.instrumentation.aspnetcore/1.14.0/opentelemetry.instrumentation.aspnetcore.1.14.0.nupkg.sha512",
+    "/home/mmdcj/.nuget/packages/system.diagnostics.diagnosticsource/10.0.0/system.diagnostics.diagnosticsource.10.0.0.nupkg.sha512"
+  ],
   "logs": []
 }
