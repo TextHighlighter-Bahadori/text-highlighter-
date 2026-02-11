@@ -1,9 +1,10 @@
+using CsharpHighlighter.Application;
 using CsharpHighlighter.Domain.ASTNode;
 using CsharpHighlighter.Domain.Token;
 
 namespace CSharpHighlighter.Application;
 
-public class CSharpParserService
+public class CSharpParserService : ICSharpParserService
 {
     private List<Token> _tokens;
     private int _current;
