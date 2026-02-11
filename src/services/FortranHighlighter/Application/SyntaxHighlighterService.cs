@@ -66,6 +66,9 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
 
     private void AssignColorsToNode(AstNode node)
     {
+        if (node == null)
+            return;
+
         switch (node)
         {
             case ProgramNode program:
@@ -170,7 +173,8 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
 
     private void AssignColor(Token token, string color, bool bold = false)
     {
-        _positionToColor[token.Position] = bold ? $"Bold{color}" : color;
+        if (token != null)
+            _positionToColor[token.Position] = bold ? $"Bold{color}" : color;
     }
 
     private static string GetColorForTokenType(TokenType type)

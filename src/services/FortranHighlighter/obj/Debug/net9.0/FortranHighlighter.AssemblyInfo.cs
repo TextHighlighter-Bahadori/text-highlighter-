@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FortranHighlighter")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e28d06b7306d327318333735c3dd76166179160c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4c6d26a09215685d41c695d0197d466d4f39e816")]
 [assembly: System.Reflection.AssemblyProductAttribute("FortranHighlighter")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FortranHighlighter")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
