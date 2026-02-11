@@ -27,7 +27,7 @@
     },
     {
       "UpstreamPathTemplate": "/api/csharp/Highlight",
-      "DownstreamPathTemplate": "/api/fortran/Highlight",
+      "DownstreamPathTemplate": "/api/csharp/Highlight",
       "DownstreamHostAndPorts": [
         {
           "Host": "csharp-highlighter",

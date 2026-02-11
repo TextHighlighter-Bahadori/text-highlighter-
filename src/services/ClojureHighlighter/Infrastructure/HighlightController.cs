@@ -3,7 +3,7 @@ using ClojureHighlighter.Application;
 using ClojureHighlighter.Infrastracture.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ClojureHighlighter.Infrastracture;
+namespace ClojureHighlighter.Infrastructure;
 
 [ApiController]
 [Route("/api/clojure/[controller]")]

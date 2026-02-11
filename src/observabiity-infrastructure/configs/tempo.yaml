@@ -10,10 +10,15 @@ distributor:
         http:
           endpoint: 0.0.0.0:4318
 
+ingester:
+  lifecycler:
+    ring:
+      replication_factor: 1
+
 storage:
   trace:
     backend: local
     local:
-      path: /tmp/tempo/traces
+      path: /tmp/tempo/blocks
     wal:
       path: /tmp/tempo/wal

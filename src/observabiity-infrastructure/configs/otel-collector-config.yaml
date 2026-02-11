@@ -7,7 +7,6 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
-
   batch:
     timeout: 10s
     send_batch_size: 1024
@@ -18,8 +17,17 @@ processors:
     limit_mib: 512
     spike_limit_mib: 128
 
+  # Add this processor to ensure service.name exists
+  resource:
+    attributes:
+      - key: service.name
+        action: upsert
+        value: "unknown_service"
+      - key: loki.resource.labels
+        action: insert
+        value: service.name
+
 exporters:
-  
   otlp/tempo:
     endpoint: "tempo:4317"
     tls:
@@ -30,26 +38,22 @@ exporters:
     namespace: highlighter
   
   otlphttp/loki:
-    endpoint: "loki:9096"  #grpc 
+    endpoint: "http://loki:3100/otlp"
     tls:
       insecure: true
 
-
 service:
   pipelines:
-    # Logs pipeline: OTLP → Loki
     logs:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, resource, batch]  # Added resource processor
       exporters: [otlphttp/loki]
     
-    # Traces pipeline: OTLP → Tempo
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [otlp/tempo]
     
-    # Metrics pipeline: OTLP → Prometheus
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch]

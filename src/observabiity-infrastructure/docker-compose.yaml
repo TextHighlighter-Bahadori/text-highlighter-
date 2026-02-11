@@ -9,6 +9,7 @@ services:
     ports:
       - "4317:4317" #Grpc 
       - "4318:4318" #Http
+      - "8889:8889"
     networks:
       - highlighter-network
   
@@ -16,6 +17,7 @@ services:
   loki:
     image: grafana/loki:latest
     container_name: loki
+    command: [ "-config.file=/etc/loki/local-config.yaml" ]
     ports:
       - "3100:3100"
     user: "0:0"
@@ -35,6 +37,7 @@ services:
       - ./data/tempo-data:/tmp/tempo
     ports:
       - "3200:3200"
+      - "7946:7946"  # Add memberlist port
     networks:
       - highlighter-network
     user: "0:0"

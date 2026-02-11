@@ -64,7 +64,7 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
         return result;
     }
 
-    private void AssignColorsToNode(AstNode node)
+    private void AssignColorsToNode(AstNode? node)
     {
         if (node == null)
             return;
@@ -171,7 +171,7 @@ public class SyntaxHighlighterService : ISyntaxHighlighterService
         }
     }
 
-    private void AssignColor(Token token, string color, bool bold = false)
+    private void AssignColor(Token? token, string color, bool bold = false)
     {
         if (token != null)
             _positionToColor[token.Position] = bold ? $"Bold{color}" : color;
