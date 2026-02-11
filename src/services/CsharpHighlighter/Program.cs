@@ -35,7 +35,7 @@ builder.Services.AddOpenTelemetry()
         .AddAspNetCoreInstrumentation()
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("http://otel-collector:4317");
+            options.Endpoint = new Uri(builder.Configuration["OTLP_Receiver_Endpoint"]!);
             options.Protocol = OtlpExportProtocol.Grpc;
         }))
     .WithMetrics(metrics => metrics
@@ -43,7 +43,7 @@ builder.Services.AddOpenTelemetry()
         .AddAspNetCoreInstrumentation()
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("http://otel-collector:4317");
+            options.Endpoint = new Uri(builder.Configuration["OTLP_Receiver_Endpoint"]!);
             options.Protocol = OtlpExportProtocol.Grpc;
         }));
 
@@ -56,7 +56,7 @@ builder.Logging.AddOpenTelemetry(logging =>
             .AddService(serviceName: builder.Environment.ApplicationName))
         .AddOtlpExporter(options =>
         {
-            options.Endpoint = new Uri("http://otel-collector:4317");
+            options.Endpoint = new Uri(builder.Configuration["OTLP_Receiver_Endpoint"]!);
             options.Protocol = OtlpExportProtocol.Grpc;
         });
 });
