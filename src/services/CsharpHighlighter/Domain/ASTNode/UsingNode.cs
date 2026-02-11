@@ -1,5 +1,5 @@
 namespace CsharpHighlighter.Domain.ASTNode;
-using CsharpHighlighter.Domain.Token;
+using CsharpHighlighter.Domain.Token; 
 
 public class UsingNode : AstNode
 {
