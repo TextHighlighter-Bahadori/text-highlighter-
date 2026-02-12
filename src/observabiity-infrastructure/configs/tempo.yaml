@@ -1,6 +1,13 @@
 server:
   http_listen_port: 3200
 
+# This section allows Tempo components to "gossip" and find each other
+memberlist:
+  abort_if_cluster_join_fails: false
+  bind_port: 7946
+  join_members:
+    - tempo:7946
+
 distributor:
   receivers:
     otlp:
@@ -12,8 +19,17 @@ distributor:
 
 ingester:
   lifecycler:
+    address: 127.0.0.1
     ring:
+      kvstore:
+        store: memberlist # Changed from 'inmemory'
       replication_factor: 1
+    final_sleep: 0s
+
+# The querier needs to know where to look for the ingester ring
+querier:
+  frontend_worker:
+    frontend_address: 127.0.0.1:9095
 
 storage:
   trace:

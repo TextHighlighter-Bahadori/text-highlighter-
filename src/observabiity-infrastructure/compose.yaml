@@ -31,7 +31,7 @@ services:
   tempo:
     image: grafana/tempo:latest
     container_name: tempo
-    command: [ "-config.file=/etc/tempo.yaml" ]
+    command: [ "-config.file=/etc/tempo.yaml","-target=all" ]
     volumes:
       - ./configs/tempo.yaml:/etc/tempo.yaml
       - ./data/tempo-data:/tmp/tempo
